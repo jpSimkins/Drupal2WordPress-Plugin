@@ -23,10 +23,9 @@ WordPress 3.x+ plugin for importing Drupal 7 (Works for WordPress 4.x too)
 ## Important Info
 
 * The script will truncate (delete all records) for the options you select. 
-    - This means content will be lost if you already have some
+    - This means content will be lost if you already have some (This is to keep the IDs matching properly)
         - If you want to keep your content, export it using: _Tools_ -> _Export_
         - When Drupal has been imported, you can import your old data by using: _Tools_ -> _Import_
-    - This is to keep the IDs matching properly
 * Install the plugin as any other plugin
     - Once activated, you will see the plugin under _Tools_ -> _Drupal2WordPress_
 
