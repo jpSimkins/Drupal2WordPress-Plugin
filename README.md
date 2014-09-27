@@ -35,3 +35,4 @@ WordPress 3.x+ plugin for importing Drupal 7 (Works for WordPress 4.x too)
 - [ ] Allow for custom post type association
 - [ ] L10n
 - [ ] Add Drupal version selector to allow for 6 and 8 to be added
+- [ ] Add tests
