@@ -1,6 +1,4 @@
-[![Build Status](https://travis-ci.org/jpSimkins/Drupal2WordPress-Plugin.svg)](https://travis-ci.org/jpSimkins/Drupal2WordPress-Plugin)
-
-Drupal2WordPress Plugin
+Drupal2WordPress Plugin   [![Build Status](https://travis-ci.org/jpSimkins/Drupal2WordPress-Plugin.svg)](https://travis-ci.org/jpSimkins/Drupal2WordPress-Plugin)
 =======================
 
 This plugin is based off the repo: https://github.com/lirantal/Drupal2WordPress
