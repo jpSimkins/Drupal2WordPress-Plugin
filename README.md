@@ -1,3 +1,5 @@
+[![Build Status](https://travis-ci.org/jpSimkins/Drupal2WordPress-Plugin.svg)](https://travis-ci.org/jpSimkins/Drupal2WordPress-Plugin)
+
 Drupal2WordPress Plugin
 =======================
 
