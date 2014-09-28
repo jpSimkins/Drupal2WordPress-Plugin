@@ -1,2 +1,0 @@
-<p><?php _e('This page collects the settings to connect to the Drupal database.', 'drupal2wp'); ?></p>
-<p><?php _e('This allows for the content to be imported. At this point, no content is imported.', 'drupal2wp'); ?></p>

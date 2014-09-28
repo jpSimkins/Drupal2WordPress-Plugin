@@ -199,12 +199,19 @@ class Drupal2WordPress_DrupalImporter {
             ");
         if ($drupal_tags) {
             foreach($drupal_tags as $dt) {
+                // Fix diacritic slug
+//                $dt['slug'] = iconv("UTF-8", "ISO-8859-1//IGNORE", $dt['slug']);
+                // Replace _ to -
+                $dt['slug'] = str_replace('_', '-', $dt['slug']);
+                // remove quotes from slugs
+                $dt['slug'] = strtolower(str_replace(array('"',"'"), '', $dt['slug']));
+                // Insert the new term
                 $wpdb->insert(
                     $wpdb->terms,
                     array(
                         'term_id' => $dt['tid'],
                         'name' => $dt['name'],
-                        'slug' => strtolower(str_replace(array('"',"'"), '', str_replace('_', '-', $dt['slug'])))
+                        'slug' => $dt['slug']
                     ),
                     array(
                         '%d',
@@ -312,7 +319,9 @@ class Drupal2WordPress_DrupalImporter {
         $result = $wpdb->query("
             UPDATE {$wpdb->term_taxonomy} tt
               SET `count` = (
-                SELECT COUNT(tr.object_id) FROM {$wpdb->term_relationships} tr WHERE tr.term_taxonomy_id = tt.term_taxonomy_id
+                SELECT COUNT(tr.object_id)
+                FROM {$wpdb->term_relationships} tr
+                WHERE tr.term_taxonomy_id = tt.term_taxonomy_id
             )
         ");
         if ($result !== false) {
@@ -346,6 +355,13 @@ class Drupal2WordPress_DrupalImporter {
         ");
         if (!empty($drupal_posts)) {
             foreach($drupal_posts as $dp) {
+                // Force movie reviews to it's own custom post type
+                $testTitle = substr($dp['post_title'], 0, strlen('Christian Movie Review:'));
+                if ($testTitle !== false && strtolower($testTitle) == 'christian movie review:') {
+                    $dp['post_type'] = 'christian-movie-review';
+                }
+
+                // @todo make this optional and set what goes where
                 // Customize this to your setup
                 switch($dp['post_type']) {
                     case 'article':
@@ -355,6 +371,7 @@ class Drupal2WordPress_DrupalImporter {
                         $post_type = 'page';
                         break;
                 }
+
 
                 $wpdb->insert(
                     $wpdb->posts,
@@ -382,7 +399,7 @@ class Drupal2WordPress_DrupalImporter {
                     )
                 );
 
-                // @todo maybe add an array of errors to identify what posts were not imported
+                // @todo add an array of errors to identify what posts were not imported
 
                 // Attach all posts the terms/tags
                 if ('post' === $post_type) {
@@ -416,14 +433,25 @@ class Drupal2WordPress_DrupalImporter {
 
         // Ensure we are importing this data
         if (empty($this->options['terms']) || empty($this->options['posts'])) {
-            return $this; // maintain chaining
+            return false;
         }
 
         //Add relationship for post and tags
-        $drupal_post_tags = $this->_drupalDB->results("SELECT DISTINCT node.nid, taxonomy_term_data.tid FROM (".$this->dbSettings['prefix']."taxonomy_index taxonomy_index INNER JOIN ".$this->dbSettings['prefix']."taxonomy_term_data taxonomy_term_data ON (taxonomy_index.tid = taxonomy_term_data.tid)) INNER JOIN ".$this->dbSettings['prefix']."node node ON (node.nid = taxonomy_index.nid)");
+        $drupal_post_tags = $this->_drupalDB->results("
+          SELECT DISTINCT
+            node.nid,
+            taxonomy_term_data.tid
+          FROM (".$this->dbSettings['prefix']."taxonomy_index taxonomy_index
+            INNER JOIN ".$this->dbSettings['prefix']."taxonomy_term_data taxonomy_term_data ON (taxonomy_index.tid = taxonomy_term_data.tid))
+            INNER JOIN ".$this->dbSettings['prefix']."node node ON (node.nid = taxonomy_index.nid)
+        ");
         if (!empty($drupal_post_tags)) {
             foreach($drupal_post_tags as $dpt) {
-                $wordpress_term_tax = $wpdb->get_var("SELECT DISTINCT term_taxonomy.term_taxonomy_id FROM {$wpdb->term_taxonomy} term_taxonomy  WHERE (term_taxonomy.term_id = ".$dpt['tid'].")");
+                $wordpress_term_tax = $wpdb->get_var("
+                  SELECT DISTINCT
+                    term_taxonomy.term_taxonomy_id
+                  FROM {$wpdb->term_taxonomy} term_taxonomy
+                  WHERE (term_taxonomy.term_id = ".$dpt['tid'].")");
 
                 // Attach all posts the terms/tags
                 $wpdb->insert(
@@ -481,11 +509,19 @@ class Drupal2WordPress_DrupalImporter {
         global $wpdb;
 
         //Get the url alias from drupal and use it for the Post Slug
-        $drupal_url = $this->_drupalDB->results("SELECT url_alias.source, url_alias.alias FROM ".$this->dbSettings['prefix']."url_alias url_alias WHERE (url_alias.source LIKE 'node%')");
+        $drupal_url = $this->_drupalDB->results("
+          SELECT
+            url_alias.source,
+            url_alias.alias
+          FROM ".$this->dbSettings['prefix']."url_alias
+          WHERE (url_alias.source LIKE 'node%')
+        ");
         foreach($drupal_url as $du) {
             // Fix slug
             $newSlug = str_replace('content/', '', $du['alias']);
-            // Add to htaccess data if different
+            // Fix diacritic string
+//            $newSlug = iconv("UTF-8", "ISO-8859-1//IGNORE", $newSlug);
+            // Add to rewrite rules if different
             if ($newSlug != $du['alias']) {
                 $this->_htaccessRewriteRules[$du['alias']] = $newSlug;
             }
@@ -532,10 +568,8 @@ class Drupal2WordPress_DrupalImporter {
                 c.mail AS comment_author_email,
                 c.homepage AS comment_author_url,
                 c.hostname AS comment_author_IP,
-                FROM_UNIXTIME(c.created) AS comment_date,
-                field_data_comment_body.comment_body_value AS comment_content
+                FROM_UNIXTIME(c.created) AS comment_date
             FROM ".$this->dbSettings['prefix']."comment c
-                INNER JOIN ".$this->dbSettings['prefix']."field_data_comment_body field_data_comment_body ON (c.cid = field_data_comment_body.entity_id)
             WHERE c.pid = {$commentID}
                 AND c.status = 1
             ");
@@ -587,7 +621,14 @@ class Drupal2WordPress_DrupalImporter {
     private function _importCommentsCount() {
         global $wpdb;
         //Update Comment Counts in Wordpress
-        $result = $wpdb->query("UPDATE {$wpdb->posts} SET comment_count = ( SELECT COUNT(comment_post_id) FROM {$wpdb->comments} WHERE {$wpdb->posts}.id = {$wpdb->comments}.comment_post_id )");
+        $result = $wpdb->query("
+          UPDATE {$wpdb->posts}
+            SET comment_count = (
+              SELECT COUNT(comment_post_id)
+              FROM {$wpdb->comments}
+              WHERE {$wpdb->posts}.id = {$wpdb->comments}.comment_post_id
+            )
+        ");
         if ($result !== false) {
             print '<p><span style="color: green;">'.__('Posts Comments Count Updated', 'drupal2wp').'</span></p>';
         } else {
@@ -721,6 +762,8 @@ class Drupal2WordPress_DrupalImporter {
                 echo 'Redirect '.$oldURI.' '.$newURI.' [R=301,L]'.PHP_EOL;
             }
             echo '</textarea>';
+        } else {
+            print '<p>'.__('No rewrites are necessary.', 'drupal2wp').'</p>';
         }
         return $this; // maintain chaining
     }

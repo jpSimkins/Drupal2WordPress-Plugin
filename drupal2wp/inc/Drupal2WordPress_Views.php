@@ -61,21 +61,6 @@ class Drupal2WordPress_Views {
      */
     public function init() {
         $this->_processRequest();
-        $this->_buildHelpMenu();
-    }
-
-    /**
-     * Builds the page view help menu
-     */
-    private function _buildHelpMenu() {
-        $screen = get_current_screen();
-        if (is_object($screen)) {
-            $screen->add_help_tab(array(
-                'title' => __('Details', 'drupal2wp'),
-                'id' => $this->_pageHook,
-                'content' => $this->_helpMenu()
-            ));
-        }
     }
 
     /**
@@ -155,20 +140,6 @@ class Drupal2WordPress_Views {
         } else {
             throw new Exception(__('Invalid Step for importing', 'drupal2wp'));
         }
-    }
-
-    /**
-     * Adds the help menu
-     * @return string The text of the help menu.
-     */
-    public function _helpMenu() {
-        $_file = DRUPAL2WP_VIEWS_DIRECTORY."step{$this->_step}-help-menu.php";
-        if (file_exists($_file)) {
-            ob_start();
-            include($_file);
-            return ob_get_clean();
-        }
-        return '';
     }
 
     /**

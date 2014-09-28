@@ -40,7 +40,7 @@ class Drupal2WordPress {
             session_start();
         }
         // Define menu
-        $this->_pageHook = add_management_page(__('Drupal 2 WordPress', 'drupal2wp'), __('Drupal 2 WordPress', 'drupal2wp'), 'import', $this->basename, array($this, 'initMenuPage'));
+        $this->_pageHook = register_importer( 'drupal2wordpress', __('Drupal 2 WordPress', 'drupal2wp'), __('Import <strong>posts, pages, comments, categories, and tags</strong> from a Drupal database.', 'drupal2wp'),  array($this, 'init'));
         // Init the page view on load
         add_action( 'load-' . $this->_pageHook, array($this, 'init') );
     }
@@ -52,12 +52,6 @@ class Drupal2WordPress {
         // Initialize the view
         $this->_views = new Drupal2WordPress_Views($this->_pageHook);
         $this->_views->init();
-    }
-
-    /**
-     * Initializes the view for the plugin page
-     */
-    function initMenuPage() {
         $this->_views->showPage();
     }
 

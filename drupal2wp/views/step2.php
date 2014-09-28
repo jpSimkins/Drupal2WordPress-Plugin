@@ -80,12 +80,7 @@
                     break;
             }
         });
-        /**
-         * Toggles the children of the parent option
-         * @param childIdentifier
-         * @param isChecked
-         * @private
-         */
+
         function _drupal2wp_child_toggle(childIdentifier, isChecked) {
             if (isChecked) {
                 $(childIdentifier).fadeIn();
@@ -93,5 +88,6 @@
                 $(childIdentifier).fadeOut();
             }
         }
+
     });
 </script>
