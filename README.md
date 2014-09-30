@@ -31,11 +31,11 @@ This plugin was built to import Drupal to WordPress.
 **This should go without saying but make sure to test this script locally before using on a production environment**
 
 * The script will truncate (delete all records) for the options you select. 
-    - This means content will be lost if you already have some (This is to keep the IDs matching properly)
+    - This means original WordPress content will be lost, if you have any. (This is to keep the content IDs matching for all options)
         - If you want to keep your content, export it using: _Tools_ -> _Export_
         - When Drupal has been imported, you can import your old data by using: _Tools_ -> _Import_
-* Install the plugin as any other plugin
-    - Once activated, you will see the plugin under _Tools_ -> _Import_ -> _Drupal 2 WordPress_
+* Install this plugin as any other plugin
+    - Once activated, you will find the importer under _Tools_ -> _Import_ -> _Drupal 2 WordPress_
 
 
 ## Todo
