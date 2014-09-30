@@ -46,8 +46,9 @@ WordPress 3.x+ plugin for importing Drupal 7 (works for WordPress 4.x too)
 
 ## Todo
 - [x] Allow for custom post type association
+- [ ] See about solving duplicate tag slug issues (site I'm working on has this issue...)
 - [ ] Import media sources
-- [ ] Add multi-lingual import option (a site I need to import uses two languages so I have duplicate content as each post has two versions)
+- [ ] Add multi-lingual import option (site I'm working on uses two languages so I have duplicate content as each post has two versions)
 - [ ] Add Drupal version selector to allow for 6 and 8 to be added
 - [ ] L10n
 
