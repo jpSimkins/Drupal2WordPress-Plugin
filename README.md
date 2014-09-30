@@ -13,7 +13,8 @@ This plugin was built to import Drupal to WordPress.
     - Choose from importing terms, content, and/or users
     - Associate WordPress post_types to Drupal node types
     - Choose to import comments
-* Outputs .htaccess rewrite rules for alias changes
+* Cleans Drupal aliases
+    - Outputs .htaccess rewrite rules for alias changes
 
 
 **This script supports the migration of the following items:**
@@ -36,9 +37,8 @@ This plugin was built to import Drupal to WordPress.
 
 
 ## Todo
+- [x] Allow for custom post type association
 - [ ] Import media sources
 - [ ] Add multi-lingual import option (a site I need to import uses two languages so I have duplicate content as each post has two versions)
-- [ ] Allow for custom post type association
-- [ ] L10n
 - [ ] Add Drupal version selector to allow for 6 and 8 to be added
-- [ ] Add tests
+- [ ] L10n
