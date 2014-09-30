@@ -1,11 +1,7 @@
 Drupal2WordPress Plugin 
 =======================
 
-This plugin is based off the repo: https://github.com/lirantal/Drupal2WordPress
-
-WordPress 3.x+ plugin for importing Drupal 7 (Works for WordPress 4.x too)
-
-This plugin was built to import Drupal to WordPress. 
+WordPress 3.x+ plugin for importing Drupal 7 (works for WordPress 4.x too)
 
 ## Features
 * WordPress plugin
@@ -57,3 +53,6 @@ This plugin was built to import Drupal to WordPress.
 
 ## Known Issues
 - [ ] Page tags seems to have been broken. That or I messed up previously and thought they had tags. I'm looking into this now
+
+
+This plugin is based off the repo: https://github.com/lirantal/Drupal2WordPress
