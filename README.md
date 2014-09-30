@@ -18,13 +18,23 @@ This plugin was built to import Drupal to WordPress.
 
 
 **This script supports the migration of the following items:**
-* **Content (Drupal nodes)** - nodes of type "article" are migrated into WordPress as 'post' content type, and any other Drupal node content type is migrated into WordPress as 'page' content type. All nodes are imported with their original owner user id, timestamp, published or unpublished state. With regards to SEO, Drupal's leading 'content/' prefix for any page is removed.
-    - Comments on Content (up to 11 levels of threaded comments) - only approved comments are imported due to the high level of spam which Drupal sites might endure (in Drupal this means all comments with status 1)
+* **Content (Drupal nodes)** 
+    - You can associate Drupal node types to WordPress post types.
+    - All nodes are imported with their original owner user id (if users are imported, otherwise you can choose the user ID to associate all content to), timestamp, published or unpublished state. 
+    - With regards to SEO, Drupal's leading 'content/' prefix for any page is removed.
+        - Drupal was more forgiving with malformed aliases (slugs), this plugin will clean the alias to a proper slug.
+            - These changes are outputted for you to add to your .htaccess file to do proper redirects.
+    - Comments on Content (up to 11 levels of threaded comments) [May make the level nesting optional]
+        - Only approved comments are imported due to the high level of spam which Drupal sites might endure (in Drupal this means all comments with status 1)
 * **Terms**
-    - _Categories_ - WordPress requires that any blog post is associated with at least one category, and not just a tag, hence the script will create a default category (you get to decide what it is) and associate all of the content created into that category.
+    - _Categories_ 
+        - WordPress requires that any blog post is associated with at least one category, and not just a tag, hence the script will create a default category (you get to decide what it is) and associate all of the content created into that category.
     - _Taxonomies_
-* **Users** - Drupal's user id 0 (anonymous) and user id 1 (site admin) are ignored. User's basic information is migrated, such as username, e-mail and creation date. Users are migrated with no password, which means in WordPress that they can't login and must reset their account details (this is due to security reasons).
-    - Adds default user meta too
+* **Users** 
+    - Drupal's user id 0 (anonymous) and user id 1 (site admin) are ignored. 
+    - User's basic information is migrated, such as username, e-mail and creation date. 
+        - **Users are migrated with no password, which means in WordPress that they can't login and must reset their account details (this is due to security reasons).**
+    - Adds default user meta
 
 ## Important Info
 
