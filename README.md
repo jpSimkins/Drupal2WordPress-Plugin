@@ -17,7 +17,7 @@ This plugin was built to import Drupal to WordPress.
     - Outputs .htaccess rewrite rules for alias changes
 
 
-**This script supports the migration of the following items:**
+## Import Options
 * **Content (Drupal nodes)** 
     - You can associate Drupal node types to WordPress post types.
     - All nodes are imported with their original owner user id (if users are imported, otherwise you can choose the user ID to associate all content to), timestamp, published or unpublished state. 
