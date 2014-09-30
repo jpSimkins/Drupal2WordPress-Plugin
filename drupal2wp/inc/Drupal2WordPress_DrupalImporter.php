@@ -389,7 +389,7 @@ class Drupal2WordPress_DrupalImporter {
                 }
 
                 // Fix author
-                $dp['post_author'] = !empty($this->options['associate_content_user_id']) ? $this->options['associate_content_user_id'] : $dp['post_author'];
+                $dp['post_author'] = (empty($this->options['users']) && !empty($this->options['associate_content_user_id'])) ? $this->options['associate_content_user_id'] : $dp['post_author'];
 
                 // Fix media paths
                 // @todo make this work on post meta properly (perhaps move resources to it's own directory in the uploads folder
@@ -442,7 +442,7 @@ class Drupal2WordPress_DrupalImporter {
                 // @todo add an array of errors to identify what content was not imported
 
                 // @todo add hook here for after insert callbacks $dp (hand the post as the data may be useful)
-                
+
             }
 
 

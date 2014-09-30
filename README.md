@@ -10,9 +10,9 @@ This plugin was built to import Drupal to WordPress.
 ## Features
 * WordPress plugin
 * Import options
-    - Choose from importing terms, content, and/or users
+    - Choose from importing terms, content, comments, and/or users
+        - comments can only be imported if content is
     - Associate WordPress post_types to Drupal node types
-    - Choose to import comments
 * Cleans Drupal aliases
     - Outputs .htaccess rewrite rules for alias changes
 
@@ -34,6 +34,8 @@ This plugin was built to import Drupal to WordPress.
         - When Drupal has been imported, you can import your old data by using: _Tools_ -> _Import_
 * Install the plugin as any other plugin
     - Once activated, you will see the plugin under _Tools_ -> _Import_ -> _Drupal 2 WordPress_
+    
+**This should go without saying but make sure to test this script locally before using on a production environment**
 
 
 ## Todo
@@ -42,3 +44,6 @@ This plugin was built to import Drupal to WordPress.
 - [ ] Add multi-lingual import option (a site I need to import uses two languages so I have duplicate content as each post has two versions)
 - [ ] Add Drupal version selector to allow for 6 and 8 to be added
 - [ ] L10n
+
+## Known Issues
+- [ ] Page tags seems to have been broken. That or I messed up previously and thought they had tags. I'm looking into this now

@@ -2,7 +2,7 @@
 /**
  * Plugin Name: Drupal 2 WordPress Page Tags Support
  * Description: Allows for tags to be used on Page content type
- * Version: 0.0.1
+ * Version: 1.0
  * Author: Jeremy Simkins <jpSimkins@gmail.com>
  * Author URI: http://jeremysimkins.com
  * License: GPL2
