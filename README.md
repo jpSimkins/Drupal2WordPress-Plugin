@@ -9,7 +9,10 @@ This plugin was built to import Drupal to WordPress.
 
 ## Features
 * WordPress plugin
-* Options to import what you need (options will be improved)
+* Import options
+    - Choose from importing terms, content, and/or users
+    - Associate WordPress post_types to Drupal node types
+    - Choose to import comments
 * Outputs .htaccess rewrite rules for alias changes
 
 

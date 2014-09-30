@@ -73,6 +73,30 @@ class Drupal2WordPress_DrupalImporter {
     }
 
     /**
+     * Returns an array of available post types
+     * @return array
+     */
+    public function getPostTypes() {
+        $return = array();
+        $drupalPostTypes = $this->_drupalDB->results("
+            SELECT DISTINCT
+              n.type,
+              (
+                SELECT
+                  COUNT(n2.type) as total
+                FROM ".$this->dbSettings['prefix']."node n2
+                WHERE n2.type = n.type
+              ) as total
+            FROM ".$this->dbSettings['prefix']."node n
+            ORDER BY n.type ASC
+        ");
+        foreach($drupalPostTypes as $dpt) {
+            $return[$dpt['type']] = $dpt['total'];
+        }
+        return $return;
+    }
+
+    /**
      * Process the import
      */
     public static function process() {
@@ -81,13 +105,14 @@ class Drupal2WordPress_DrupalImporter {
         // Do import
         self::getInstance()
             ->_truncateWP()
+
             ->_importTerms()
-            ->_importPosts()
-            ->_importComments()
+            ->_importContent()
             ->_importUsers()
 
             ->_ouputHtaccessRedirects()
-            ->_importComplete()
+
+            ->_complete()
         ;
     }
 
@@ -105,7 +130,7 @@ class Drupal2WordPress_DrupalImporter {
             $wpdb->query("TRUNCATE TABLE {$wpdb->terms}");
         }
 
-        if (!empty($this->options['posts'])) {
+        if (!empty($this->options['content'])) {
             $wpdb->query("TRUNCATE TABLE {$wpdb->postmeta}");
             $wpdb->query("TRUNCATE TABLE {$wpdb->posts}");
         }
@@ -135,14 +160,15 @@ class Drupal2WordPress_DrupalImporter {
     }
 
     /**
-     * Runs check and processes posts import
+     * Runs check and processes content import
      */
-    private function _importPosts() {
-        if (!empty($this->options['posts'])) {
-            $this->_importPostsContent();
-            $this->_importTagsAndPostsRelationships();
+    private function _importContent() {
+        if (!empty($this->options['content'])) {
+            $this->_importContentTypes();
+            $this->_importTagsAndRelationships();
             $this->_updatePostType();
             $this->_updateURLALiasToSlug();
+            $this->_importComments();
             // Update terms count
             if (!empty($this->options['terms'])) {
                 $this->_updateTermsCount();
@@ -150,24 +176,6 @@ class Drupal2WordPress_DrupalImporter {
         }
         return $this; // maintain chaining
     }
-
-    /**
-     * Imports comments for posts
-     * This requires posts to be selected to process
-     * @return $this
-     */
-    private function _importComments() {
-        if (!empty($this->options['comments'])) {
-            if (!empty($this->options['posts'])) {
-                $this->_importCommentsData();
-                $this->_importCommentsCount();
-            } else {
-                print '<p><span style="color: maroon;">'.__('Comments were not imported as Import Posts was not selected. Comments are associated to posts.', 'drupal2wp').'</span></p>';
-            }
-        }
-        return $this; // maintain chaining
-    }
-
 
     /**
      * Imports user data
@@ -203,8 +211,8 @@ class Drupal2WordPress_DrupalImporter {
 //                $dt['slug'] = iconv("UTF-8", "ISO-8859-1//IGNORE", $dt['slug']);
                 // Replace _ to -
                 $dt['slug'] = str_replace('_', '-', $dt['slug']);
-                // remove quotes from slugs
-                $dt['slug'] = strtolower(str_replace(array('"',"'"), '', $dt['slug']));
+                // remove junk from slugs
+                $dt['slug'] = $this->_convertToWordPressSlug($dt['slug']);
                 // Insert the new term
                 $wpdb->insert(
                     $wpdb->terms,
@@ -261,16 +269,32 @@ class Drupal2WordPress_DrupalImporter {
     }
 
     /**
-     * Creates a single category to assign posts to
+     * Converts the Drupal alias to a WordPress slug
+     * @param string $drupalAlias
+     * @return string
+     */
+    private function _convertToWordPressSlug($drupalAlias) {
+        // @todo use regex
+        $drupalAlias = str_replace(
+            array(
+                '"',
+                "'",
+                '!',
+                '.',
+            ),
+            '',
+            $drupalAlias
+        );
+        return strtolower($drupalAlias);
+    }
+
+    /**
+     * Creates a single category to assign content to
      * @return $this
      */
     private function _importCategories() {
         global $wpdb;
 
-
-        // Update worpdress category for a new Blog entry (as category) which
-        // is a must for a post to be displayed well
-        // Insert a fake new category named Blog
         $wpdb->insert(
             $wpdb->terms,
             array(
@@ -333,14 +357,14 @@ class Drupal2WordPress_DrupalImporter {
     }
 
     /**
-     * Imports posts
+     * Imports content types that were selected in step 2
      * @return $this
      */
-    private function _importPostsContent() {
+    private function _importContentTypes() {
         global $wpdb;
 
-        //Get all post from Drupal and add it into wordpress posts table
-        $drupal_posts = $this->_drupalDB->results("
+        // Get all post from Drupal and add it into WordPress
+        $drupalContent = $this->_drupalDB->results("
           SELECT
               DISTINCT n.nid AS id,
               n.uid AS post_author,
@@ -353,26 +377,27 @@ class Drupal2WordPress_DrupalImporter {
           FROM ".$this->dbSettings['prefix']."node n
             LEFT JOIN ".$this->dbSettings['prefix']."field_data_body r ON (r.entity_id = n.nid)
         ");
-        if (!empty($drupal_posts)) {
-            foreach($drupal_posts as $dp) {
-                // Force movie reviews to it's own custom post type
-                $testTitle = substr($dp['post_title'], 0, strlen('Christian Movie Review:'));
-                if ($testTitle !== false && strtolower($testTitle) == 'christian movie review:') {
-                    $dp['post_type'] = 'christian-movie-review';
+        if (!empty($drupalContent)) {
+            foreach($drupalContent as $dp) {
+                // Fetch the new post type
+                $post_type = $this->_parsePostType($dp['post_type']);
+
+                // @todo add hook here to adjust post_type
+
+                if (!$post_type) {
+                    continue;
                 }
 
-                // @todo make this optional and set what goes where
-                // Customize this to your setup
-                switch($dp['post_type']) {
-                    case 'article':
-                        $post_type = 'post';
-                        break;
-                    default:
-                        $post_type = 'page';
-                        break;
-                }
+                // Fix author
+                $dp['post_author'] = !empty($this->options['associate_content_user_id']) ? $this->options['associate_content_user_id'] : $dp['post_author'];
 
+                // Fix media paths
+                // @todo make this work on post meta properly (perhaps move resources to it's own directory in the uploads folder
+                $dp['post_content'] = str_replace('/sites/default/files/', '/wp-content/uploads/', $dp['post_content']);
 
+                // @todo add hook here to adjust $dp (the post)
+
+                // Insert into WordPress
                 $wpdb->insert(
                     $wpdb->posts,
                     array(
@@ -399,9 +424,7 @@ class Drupal2WordPress_DrupalImporter {
                     )
                 );
 
-                // @todo add an array of errors to identify what posts were not imported
-
-                // Attach all posts the terms/tags
+                // Attach post_type post to the blog_term_id
                 if ('post' === $post_type) {
                     $wpdb->insert(
                         $wpdb->term_relationships,
@@ -415,24 +438,42 @@ class Drupal2WordPress_DrupalImporter {
                         )
                     );
                 }
+
+                // @todo add an array of errors to identify what content was not imported
+
+                // @todo add hook here for after insert callbacks $dp (hand the post as the data may be useful)
+                
             }
-            print '<p><span style="color: green;">'.__('Posts Imported', 'drupal2wp').'</span></p>';
+
+
+            print '<p><span style="color: green;">'.__('Content Imported', 'drupal2wp').'</span></p>';
         } else {
-            print '<p><span style="color: maroon;">'.__('Posts Failed to Import', 'drupal2wp').' - '.__('All failed', 'drupal2wp').'</span></p>';
+            print '<p><span style="color: maroon;">'.__('Content Failed to Import', 'drupal2wp').' - '.__('All failed', 'drupal2wp').'</span></p>';
         }
 
     }
 
+    /**
+     * Return the proper post type for Drupal content
+     * @param $drupalPostType
+     * @return string
+     */
+    private function _parsePostType($drupalPostType) {
+        if (isset($this->options['associations'][$drupalPostType])) {
+            return $this->options['associations'][$drupalPostType];
+        }
+        return ''; // Force empty as default so we can skip this
+    }
 
     /**
-     * Imports tags and posts relationships
+     * Imports tags and content relationships
      * @return $this
      */
-    private function _importTagsAndPostsRelationships() {
+    private function _importTagsAndRelationships() {
         global $wpdb;
 
         // Ensure we are importing this data
-        if (empty($this->options['terms']) || empty($this->options['posts'])) {
+        if (empty($this->options['terms']) || empty($this->options['content'])) {
             return false;
         }
 
@@ -453,7 +494,7 @@ class Drupal2WordPress_DrupalImporter {
                   FROM {$wpdb->term_taxonomy} term_taxonomy
                   WHERE (term_taxonomy.term_id = ".$dpt['tid'].")");
 
-                // Attach all posts the terms/tags
+                // Attach all content to terms/tags
                 $wpdb->insert(
                     $wpdb->term_relationships,
                     array(
@@ -467,15 +508,15 @@ class Drupal2WordPress_DrupalImporter {
                 );
             }
 
-            print '<p><span style="color: green;">'.__('Tags & Posts Relationships Imported', 'drupal2wp').'</span></p>';
+            print '<p><span style="color: green;">'.__('Tags & Content Relationships Imported', 'drupal2wp').'</span></p>';
         } else {
-            print '<p><span style="color: maroon;">'.__('Tags & Posts Relationships Failed to Import', 'drupal2wp').' - '.__('All failed', 'drupal2wp').'</span></p>';
+            print '<p><span style="color: maroon;">'.__('Tags & Content Relationships Failed to Import', 'drupal2wp').' - '.__('All failed', 'drupal2wp').'</span></p>';
         }
 
     }
 
     /**
-     * Imports tags and posts relationships for WordPress
+     * Update post type
      * @return $this
      */
     private function _updatePostType() {
@@ -537,6 +578,19 @@ class Drupal2WordPress_DrupalImporter {
             );
         }
         print '<p><span style="color: green;">'.__('URL Alias to Slug Updated', 'drupal2wp').'</span></p>';
+    }
+
+    /**
+     * Imports comments for content
+     * This requires content to be selected to process
+     * @return $this
+     */
+    private function _importComments() {
+        if (!empty($this->options['comments'])) {
+            $this->_importCommentsData();
+            $this->_importCommentsCount();
+        }
+        return $this; // maintain chaining
     }
 
     /**
@@ -616,7 +670,7 @@ class Drupal2WordPress_DrupalImporter {
     }
 
     /**
-     * Updates comment count for posts
+     * Updates comment count for content
      */
     private function _importCommentsCount() {
         global $wpdb;
@@ -630,9 +684,9 @@ class Drupal2WordPress_DrupalImporter {
             )
         ");
         if ($result !== false) {
-            print '<p><span style="color: green;">'.__('Posts Comments Count Updated', 'drupal2wp').'</span></p>';
+            print '<p><span style="color: green;">'.__('Content Comments Count Updated', 'drupal2wp').'</span></p>';
         } else {
-            print '<p><span style="color: maroon;">'.__('Posts Comments Count Failed to Update', 'drupal2wp').'</span></p>';
+            print '<p><span style="color: maroon;">'.__('Content Comments Count Failed to Update', 'drupal2wp').'</span></p>';
         }
     }
 
@@ -736,7 +790,38 @@ class Drupal2WordPress_DrupalImporter {
 
 
 
-
+    /**
+     * Saves image to the media manager
+     * use: set_post_thumbnail($post_id, $attached_id); to attach the post thumbnail
+     * @param int $post_id
+     * @param string $file
+     * @param string $desc
+     * @return int false on error
+     */
+    function addFileToMediaManager($post_id, $file, $desc = '') {
+        // Download file to temp location
+        $tmp = download_url($file);
+        // Set variables for storage
+        // fix file filename for query strings
+        $file_array = array();
+        preg_match('/[^\?]+\.(jpg|jpe|jpeg|gif|png)/i', $file, $matches);
+        $file_array['name'] = basename($matches[0]);
+        $file_array['tmp_name'] = $tmp;
+        // If error storing temporarily, unlink
+        if (is_wp_error($tmp)) {
+            @unlink($file_array['tmp_name']);
+            $file_array['tmp_name'] = '';
+        }
+        // do the validation and storage stuff
+        $attached_id = media_handle_sideload($file_array, $post_id, $desc);
+        // If error storing permanently, unlink
+        if (is_wp_error($attached_id)) {
+            @unlink($file_array['tmp_name']);
+            wp_delete_post($post_id, true);
+            return false;
+        }
+        return $attached_id;
+    }
 
 
 
@@ -759,7 +844,7 @@ class Drupal2WordPress_DrupalImporter {
             echo '<h3>'.__('Add this to your .htaccess file to have proper 301 redirects', 'drupal2wp').'</h3>';
             echo '<textarea class="large-text code" readonly="readonly" style="width: 98%; min-height: 200px;">';
             foreach($this->_htaccessRewriteRules as $oldURI=>$newURI) {
-                echo 'Redirect '.$oldURI.' '.$newURI.' [R=301,L]'.PHP_EOL;
+                echo 'RewriteRule '.$oldURI.' '.$newURI.' [R=301,L]'.PHP_EOL;
             }
             echo '</textarea>';
         } else {
@@ -771,11 +856,12 @@ class Drupal2WordPress_DrupalImporter {
     /**
      * Finalizes the import process
      */
-    private function _importComplete() {
+    private function _complete() {
         // Remove Session data
         unset($_SESSION['druaplDB'], $_SESSION['options']);
         // Output message
         print '<p><span style="color: green; font-size: 2em;">'.__('Import Complete!', 'drupal2wp').'</span></p>';
+        print '<p>'.__('Drupal pages typically have tags associated to them; WordPress does not. If you want to add tag support to pages, enable the second plugin with this one: Drupal 2 WordPress Page Tags Support.', 'drupal2wp').'</p>';
         print '<p>'.__('For security reasons, please disable and remove this plugin as the import process is complete.', 'drupal2wp').'</p>';
     }
 

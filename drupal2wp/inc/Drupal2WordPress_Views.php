@@ -110,9 +110,21 @@ class Drupal2WordPress_Views {
                     add_action('drupal2wp_import_iframe', array($this, 'displayImportIframe'));
                     break;
                 case 2:
+                    // Fetch Drupal content types (bundle)
+                    $drupalPostTypes = $this->_processor->getImporterInstance()->getPostTypes();
+                    // Fetch WordPress registered post types
+                    $wpPostTypes = get_post_types();
+                    // Remove unnecessary post types for the import
+                    unset(
+                        $wpPostTypes['attachment'],
+                        $wpPostTypes['revision'],
+                        $wpPostTypes['nav_menu_item']
+                    );
                     // Adding template vars
                     $TEMPLATE_VARS['drupalVersion'] = $this->_drupalVersion;
                     $TEMPLATE_VARS['drupalPrefix'] = $_SESSION['druaplDB']['prefix'];
+                    $TEMPLATE_VARS['drupalPostTypes'] = $drupalPostTypes;
+                    $TEMPLATE_VARS['wpPostTypes'] = $wpPostTypes;
                     break;
                 default:
                     $this->_step = 1;

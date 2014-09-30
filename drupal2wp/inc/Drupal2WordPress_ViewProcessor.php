@@ -38,6 +38,14 @@ class Drupal2WordPress_ViewProcessor {
     }
 
     /**
+     * Returns the Drupal2WordPress_DrupalImporter instance
+     * @return Drupal2WordPress_DrupalImporter
+     */
+    public function getImporterInstance() {
+        return $this->_drupalImporter;
+    }
+
+    /**
      * Decide how to process the request
      */
     public function init() {
