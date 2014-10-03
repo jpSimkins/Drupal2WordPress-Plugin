@@ -37,10 +37,29 @@ class Drupal2WordPress_DrupalImporter {
     private $_drupalDB;
 
     /**
+     * Appends to duplicate slugs to fix taxonomy imports
+     * @var string
+     */
+    private $_duplicateSlugSuffix = '-DUP';
+
+    /**
      * Stores htaccess rewrite rules
      * @var array
      */
     private $_htaccessRewriteRules = array();
+
+    /**
+     * Stores any errors
+     * @var array
+     */
+    private $errors = array();
+
+    /**
+     * Stores associations for duplicate taxonomies
+     * @var array
+     */
+    private $duplicateTaxonomyAssociations = array();
+
 
     public function __construct() {
         if (empty($_SESSION['druaplDB'])) {
@@ -51,6 +70,10 @@ class Drupal2WordPress_DrupalImporter {
         $this->options = $_SESSION['options'];
         // Connect to the DB
         $this->_drupalDB = new Drupal2WordPress_DrupalDB($this->dbSettings);
+
+        // Include files necessary for media import
+        include_once(ABSPATH.'wp-admin/includes/file.php');
+        include_once(ABSPATH.'wp-admin/includes/media.php');
     }
 
     /**
@@ -73,7 +96,7 @@ class Drupal2WordPress_DrupalImporter {
     }
 
     /**
-     * Returns an array of available post types
+     * Returns an array of available Drupal post types
      * @return array
      */
     public function getPostTypes() {
@@ -92,6 +115,31 @@ class Drupal2WordPress_DrupalImporter {
         ");
         foreach($drupalPostTypes as $dpt) {
             $return[$dpt['type']] = $dpt['total'];
+        }
+        return $return;
+    }
+
+
+    /**
+     * Returns an array of available Drupal terms (vocabulary)
+     * @return array
+     */
+    public function getTerms() {
+        $return = array();
+        $drupalPostTypes = $this->_drupalDB->results("
+            SELECT DISTINCT
+              v.machine_name,
+              (
+                SELECT
+                  COUNT(d.vid) as total
+                FROM ".$this->dbSettings['prefix']."taxonomy_term_data d
+                WHERE d.vid = v.vid
+              ) as total
+            FROM ".$this->dbSettings['prefix']."taxonomy_vocabulary v
+            ORDER BY v.name ASC
+        ");
+        foreach($drupalPostTypes as $dpt) {
+            $return[$dpt['machine_name']] = $dpt['total'];
         }
         return $return;
     }
@@ -167,12 +215,13 @@ class Drupal2WordPress_DrupalImporter {
             $this->_importContentTypes();
             $this->_importTagsAndRelationships();
             $this->_updatePostType();
-            $this->_updateURLALiasToSlug();
+//            $this->_updateURLALiasToSlug();
             $this->_importComments();
             // Update terms count
             if (!empty($this->options['terms'])) {
                 $this->_updateTermsCount();
             }
+            $this->_importMedia();
         }
         return $this; // maintain chaining
     }
@@ -197,29 +246,31 @@ class Drupal2WordPress_DrupalImporter {
         global $wpdb;
 
         // Imports all terms from Drupal
-        $drupal_tags = $this->_drupalDB->results(
-            "SELECT DISTINCT
+        $drupal_tags = $this->_drupalDB->results("
+            SELECT DISTINCT
                 d.tid,
                 d.name,
-                REPLACE(LOWER(d.name), ' ', '-') AS slug
+                a.alias
             FROM ".$this->dbSettings['prefix']."taxonomy_term_data d
+                LEFT JOIN ".$this->dbSettings['prefix']."url_alias a ON (REPLACE(a.source,'taxonomy/term/','') = d.tid)
             ORDER BY d.tid ASC
             ");
+        $_fixTaxonomies = array();
         if ($drupal_tags) {
             foreach($drupal_tags as $dt) {
-                // Fix diacritic slug
-//                $dt['slug'] = iconv("UTF-8", "ISO-8859-1//IGNORE", $dt['slug']);
-                // Replace _ to -
-                $dt['slug'] = str_replace('_', '-', $dt['slug']);
-                // remove junk from slugs
-                $dt['slug'] = $this->_convertToWordPressSlug($dt['slug']);
-                // Insert the new term
-                $wpdb->insert(
+                $dt['name'] = trim($dt['name']);
+                $dt['alias'] = trim($dt['alias']);
+                // Attempt to create Drupal alias
+                $dt['alias'] = $this->_sanitizeAlias($dt['alias']);
+                // Create WordPress slug
+                $newSlug = $this->_convertToWordPressSlug($dt['name']);
+                // Import the new term
+                $result = $wpdb->insert(
                     $wpdb->terms,
                     array(
                         'term_id' => $dt['tid'],
                         'name' => $dt['name'],
-                        'slug' => $dt['slug']
+                        'slug' => $newSlug
                     ),
                     array(
                         '%d',
@@ -227,22 +278,56 @@ class Drupal2WordPress_DrupalImporter {
                         '%s'
                     )
                 );
+                // See if we have a failure
+                if ($result === false) {
+                    // This is mainly due to matching slugs, attempt with a temp slug to be fixed when done with the rest
+                    $newSlug .= $this->_duplicateSlugSuffix;
+                    $result = $wpdb->insert(
+                        $wpdb->terms,
+                        array(
+                            'term_id' => $dt['tid'],
+                            'name' => $dt['name'],
+                            'slug' => $newSlug
+                        ),
+                        array(
+                            '%d',
+                            '%s',
+                            '%s'
+                        )
+                    );
+                    // See if we have a failure
+                    if ($result === false) {
+                        $this->errors['terms'][] = $wpdb->last_error;
+                    } else {
+                        // SHould save this for fixing later
+                        $_fixTaxonomies[] = $dt;
+                        $this->errors['duplicate_taxonomies'][] = sprintf( __('Duplicate taxonomy by ID: %d. Taxonomy slug is suffixed with %s (%s)', 'drupal2wp'), $dt['tid'], $this->_duplicateSlugSuffix, $newSlug);
+                    }
+                }
             }
-
             // Update WP term_taxonomy table
             $drupal_taxonomy = $this->_drupalDB->results(
                 "SELECT DISTINCT
                     d.tid AS term_id,
-                    'post_tag' AS post_tag,
+                    v.machine_name AS post_tag,
                     d.description AS description,
                     h.parent AS parent
                 FROM ".$this->dbSettings['prefix']."taxonomy_term_data d
                     INNER JOIN ".$this->dbSettings['prefix']."taxonomy_term_hierarchy h ON (d.tid = h.tid)
+                    INNER JOIN ".$this->dbSettings['prefix']."taxonomy_vocabulary v ON (v.vid = d.vid)
                 ORDER BY 'term_id' ASC
                 ");
             if ($drupal_taxonomy) {
+                $homeURL = get_home_url();
                 foreach($drupal_taxonomy as $dt) {
-                    $wpdb->insert(
+                    // Get taxonomy association
+                    $dt['post_tag'] = $this->_parseTerms($dt['post_tag']);
+                    // Skip empty post_tags
+                    if (empty($dt['post_tag'])) {
+                        continue;
+                    }
+                    // Import term taxonomy
+                    $result = $wpdb->insert(
                         $wpdb->term_taxonomy,
                         array(
                             'term_id' => $dt['term_id'],
@@ -257,8 +342,55 @@ class Drupal2WordPress_DrupalImporter {
                             '%d'
                         )
                     );
+                    // Check for error
+                    if ($result === false) {
+                        $this->errors['term_taxonomy'][] = $wpdb->last_error;
+                        continue;
+                    }
+                    // Get term
+                    $tmpTerm = get_term_by('id', (int)$dt['term_id'], $dt['post_tag']);
+                    // If there was an error, continue to the next term.
+                    if (!$tmpTerm) {
+                        $this->errors['get_term_by_id'][] = sprintf( __('Could not load the term by ID: %d', 'drupal2wp'), $dt['term_id']);
+                        continue;
+                    }
+                    // Get term URI
+                    $tmpTermURI = get_term_link($tmpTerm);
+                    // If there was an error, continue to the next term.
+                    if( is_wp_error( $tmpTermURI ) ) {
+                        $this->errors['get_term_link'][] = sprintf( __('Could not get the term link for ID: %d. Returned error: %s', 'drupal2wp'), $dt['term_id'], $tmpTermURI->get_error_message());
+                        continue;
+                    }
+                    $tmpTermURI = str_replace($homeURL, '', $tmpTermURI);
+                    // Add to rewrite rules if different
+                    if ($tmpTermURI != $dt['alias']) {
+                        $this->_htaccessRewriteRules[$dt['alias']] = $tmpTermURI;
+                    }
                 }
             }
+
+            // Fix taxonomies (maybe add this logic later... seems edge case)
+            if (!empty($_fixTaxonomies)) {
+
+//                wp_die('<pre>'.print_r($_fixTaxonomies, true).'</pre>');
+//                foreach($_fixTaxonomies as $tax) {
+//                    // Find the duplicate
+//                    $matchedID = $wpdb->get_var(
+//                        $wpdb->prepare(
+//                            "SELECT * FROM $wpdb->terms WHERE `slug` LIKE %s",
+//                            $this->_convertToWordPressSlug($tax['name'])
+//                        )
+//                    );
+//                    // Associate all content to the duplicate
+//                    if ($matchedID) {
+//                        $this->duplicateTaxonomyAssociations[$tax['tid']][] = $matchedID;
+//                    } else {
+//                        $this->errors['fix_duplicates'][] = sprintf( __('Could not find a duplicate for ID: %d', 'drupal2wp'), $tax['tid']);
+//                    }
+//                }
+//                wp_die('<pre>'.print_r($this->duplicateTaxonomyAssociations, true).'</pre>');
+            }
+
             print '<p><span style="color: green;">'.__('Tags Imported', 'drupal2wp').'</span> - '.__('Also optimized slugs per WordPress specifications', 'drupal2wp').'</p>';
         } else {
             print '<p><span style="color: maroon;">'.__('Tags Failed to Import', 'drupal2wp').'</span></p>';
@@ -274,13 +406,29 @@ class Drupal2WordPress_DrupalImporter {
      * @return string
      */
     private function _convertToWordPressSlug($drupalAlias) {
+        // Use WordPress function to do this
+        $drupalAlias = sanitize_title( $drupalAlias);
+        return strtolower($drupalAlias);
+    }
+
+    /**
+     * Sanitize alias (or tag slug)
+     * Not to be confused with _convertToWordPressSlug
+     * This cleans the string to attempt to recreate the actual alias used in Drupal
+     * @param $drupalAlias
+     * @return string
+     */
+    private function _sanitizeAlias($drupalAlias) {
         // @todo use regex
+        // Fix diacritic slug
+//                $dt['slug'] = iconv("UTF-8", "ISO-8859-1//IGNORE", $dt['slug']);
+        $drupalAlias = str_replace('_', '-', $drupalAlias);
         $drupalAlias = str_replace(
             array(
                 '"',
                 "'",
                 '!',
-                '.',
+                '.'
             ),
             '',
             $drupalAlias
@@ -299,7 +447,7 @@ class Drupal2WordPress_DrupalImporter {
             $wpdb->terms,
             array(
                 'name' => !empty($this->options['default_category_name']) ? $this->options['default_category_name'] : 'Blog',
-                'slug' => !empty($this->options['default_category_slug']) ? $this->options['default_category_slug'] : 'blog',
+                'slug' => !empty($this->options['default_category_slug']) ? $this->options['default_category_slug'] : 'blog'
             ),
             array(
                 '%s',
@@ -373,9 +521,11 @@ class Drupal2WordPress_DrupalImporter {
               n.title AS post_title,
               r.body_summary AS post_excerpt,
               n.type AS post_type,
-              IF(n.status = 1, 'publish', 'draft') AS post_status
+              IF(n.status = 1, 'publish', 'draft') AS post_status,
+              a.alias
           FROM ".$this->dbSettings['prefix']."node n
             LEFT JOIN ".$this->dbSettings['prefix']."field_data_body r ON (r.entity_id = n.nid)
+            LEFT JOIN ".$this->dbSettings['prefix']."url_alias a ON (a.source = n.nid)
         ");
         if (!empty($drupalContent)) {
             foreach($drupalContent as $dp) {
@@ -388,6 +538,8 @@ class Drupal2WordPress_DrupalImporter {
                     continue;
                 }
 
+                $dp['post_title'] = trim($dp['post_title']);
+
                 // Fix author
                 $dp['post_author'] = (empty($this->options['users']) && !empty($this->options['associate_content_user_id'])) ? $this->options['associate_content_user_id'] : $dp['post_author'];
 
@@ -395,7 +547,13 @@ class Drupal2WordPress_DrupalImporter {
                 // @todo make this work on post meta properly (perhaps move resources to it's own directory in the uploads folder
                 $dp['post_content'] = str_replace('/sites/default/files/', '/wp-content/uploads/', $dp['post_content']);
 
+                // Fix slug
+                $dp['post_name'] = $this->_convertToWordPressSlug($dp['post_title']);
+
                 // @todo add hook here to adjust $dp (the post)
+
+
+//                wp_die('<pre>'.print_r($dp,true).'</pre>');
 
                 // Insert into WordPress
                 $wpdb->insert(
@@ -409,7 +567,8 @@ class Drupal2WordPress_DrupalImporter {
                         'post_title' => $dp['post_title'],
                         'post_excerpt' => $dp['post_excerpt'],
                         'post_type' => $post_type,
-                        'post_status' => $dp['post_status']
+                        'post_status' => $dp['post_status'],
+                        'post_name' => $dp['post_name']
                     ),
                     array(
                         '%d',
@@ -420,9 +579,16 @@ class Drupal2WordPress_DrupalImporter {
                         '%s',
                         '%s',
                         '%s',
+                        '%s',
                         '%s'
                     )
                 );
+
+                // Add to rewrite rules if different
+                $newSlug = basename( get_permalink($dp['id']) );
+                if ($newSlug !== false && $dp['alias'] && $newSlug != $dp['alias']) {
+                    $this->_htaccessRewriteRules[$dp['alias']] = $newSlug;
+                }
 
                 // Attach post_type post to the blog_term_id
                 if ('post' === $post_type) {
@@ -438,6 +604,8 @@ class Drupal2WordPress_DrupalImporter {
                         )
                     );
                 }
+
+//                $this->_importMediaForPostID($dp['id']);
 
                 // @todo add an array of errors to identify what content was not imported
 
@@ -459,8 +627,20 @@ class Drupal2WordPress_DrupalImporter {
      * @return string
      */
     private function _parsePostType($drupalPostType) {
-        if (isset($this->options['associations'][$drupalPostType])) {
-            return $this->options['associations'][$drupalPostType];
+        if (isset($this->options['content_associations'][$drupalPostType])) {
+            return $this->options['content_associations'][$drupalPostType];
+        }
+        return ''; // Force empty as default so we can skip this
+    }
+
+    /**
+     * Return the proper term type for Drupal taxonomies
+     * @param $drupalTaxonomy
+     * @return string
+     */
+    private function _parseTerms($drupalTaxonomy) {
+        if (isset($this->options['term_associations'][$drupalTaxonomy])) {
+            return $this->options['term_associations'][$drupalTaxonomy];
         }
         return ''; // Force empty as default so we can skip this
     }
@@ -488,11 +668,18 @@ class Drupal2WordPress_DrupalImporter {
         ");
         if (!empty($drupal_post_tags)) {
             foreach($drupal_post_tags as $dpt) {
+                // Get the WordPress term ID
                 $wordpress_term_tax = $wpdb->get_var("
                   SELECT DISTINCT
                     term_taxonomy.term_taxonomy_id
                   FROM {$wpdb->term_taxonomy} term_taxonomy
                   WHERE (term_taxonomy.term_id = ".$dpt['tid'].")");
+
+                if (NULL === $wordpress_term_tax && isset($this->duplicateTaxonomyAssociations[$dpt['tid']])) {
+                    $wordpress_term_tax = $this->duplicateTaxonomyAssociations[$dpt['tid']];
+
+                    wp_die($dpt['tid'].' - '.$wordpress_term_tax);
+                }
 
                 // Attach all content to terms/tags
                 $wpdb->insert(
@@ -552,16 +739,17 @@ class Drupal2WordPress_DrupalImporter {
         //Get the url alias from drupal and use it for the Post Slug
         $drupal_url = $this->_drupalDB->results("
           SELECT
+            node.nid,
+            node.title,
             url_alias.source,
             url_alias.alias
           FROM ".$this->dbSettings['prefix']."url_alias
+            INNER JOIN ".$this->dbSettings['prefix']."node ON (CONCAT('node/', node.nid) = url_alias.source)
           WHERE (url_alias.source LIKE 'node%')
         ");
         foreach($drupal_url as $du) {
             // Fix slug
-            $newSlug = str_replace('content/', '', $du['alias']);
-            // Fix diacritic string
-//            $newSlug = iconv("UTF-8", "ISO-8859-1//IGNORE", $newSlug);
+            $newSlug = $this->_convertToWordPressSlug($du['title']);
             // Add to rewrite rules if different
             if ($newSlug != $du['alias']) {
                 $this->_htaccessRewriteRules[$du['alias']] = $newSlug;
@@ -788,6 +976,40 @@ class Drupal2WordPress_DrupalImporter {
 
 
 
+    private function _importMedia() {
+
+    }
+
+
+    private function _importMediaForPostID($postID) {
+        $postMedia = $this->_drupalDB->results(
+            "SELECT
+                u.fid,
+                m.uri,
+                m.filename
+            FROM ".$this->dbSettings['prefix']."file_usage u
+                LEFT JOIN ".$this->dbSettings['prefix']."file_managed m ON (m.fid = u.fid)
+            WHERE u.type = 'node'
+             AND u.id = {$postID}
+            ");
+        if (!empty($postMedia)) {
+            $mediaCount = count($postMedia);
+            foreach ($postMedia as $pMedia) {
+                $file = str_replace('public://', '', $pMedia['uri']);
+
+//                $file = rawurlencode($file);
+//                $file = 'http://parables.tv/sites/default/files/'.$file;
+//                wp_die($file.'<pre>'.print_r($pMedia, true).'</pre>');
+
+                $attachmentID = $this->addFileToMediaManager($postID, $file);
+                if ($attachmentID) {
+                    set_post_thumbnail($postID, $attachmentID);
+                } else {
+                    $this->errors['attached_media'][] = sprintf( __('Failed to attach media file: %s', 'drupal2wp'), $pMedia['filename']);
+                }
+            }
+        }
+    }
 
 
     /**
@@ -798,7 +1020,7 @@ class Drupal2WordPress_DrupalImporter {
      * @param string $desc
      * @return int false on error
      */
-    function addFileToMediaManager($post_id, $file, $desc = '') {
+    private function addFileToMediaManager($post_id, $file, $desc = '') {
         // Download file to temp location
         $tmp = download_url($file);
         // Set variables for storage
@@ -858,7 +1080,20 @@ class Drupal2WordPress_DrupalImporter {
      */
     private function _complete() {
         // Remove Session data
-        unset($_SESSION['druaplDB'], $_SESSION['options']);
+//        unset($_SESSION['druaplDB'], $_SESSION['options']);
+        // Show errors
+        if (!empty($this->errors)) {
+            foreach($this->errors as $errorID=>$error) {
+                if (is_array($error)) {
+                    echo '<h4>'.$errorID.'</h4>';
+                    foreach($error as $err) {
+                        echo '<p>'.$err.'</p>';
+                    }
+                } else {
+                    echo '<p>'.$error.'</p>';
+                }
+            }
+        }
         // Output message
         print '<p><span style="color: green; font-size: 2em;">'.__('Import Complete!', 'drupal2wp').'</span></p>';
         print '<p>'.__('Drupal pages typically have tags associated to them; WordPress does not. If you want to add tag support to pages, enable the second plugin with this one: Drupal 2 WordPress Page Tags Support.', 'drupal2wp').'</p>';

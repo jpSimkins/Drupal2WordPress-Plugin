@@ -98,6 +98,12 @@ class Drupal2WordPress_Views {
             wp_die( __('You do not have sufficient permissions to access this page.') );
         }
         try {
+
+//            $newSlug = get_permalink(162);
+////            $newSlug = basename( $newSlug );
+//
+//            wp_die('<pre>'.print_r($newSlug,true).'</pre>');
+
             $TEMPLATE_VARS = array(
                 'errors' => $this->errors,
                 'success' => $this->success,
@@ -110,6 +116,8 @@ class Drupal2WordPress_Views {
                     add_action('drupal2wp_import_iframe', array($this, 'displayImportIframe'));
                     break;
                 case 2:
+                    // Fetch Drupal Terms
+                    $drupalTerms = $this->_processor->getImporterInstance()->getTerms();
                     // Fetch Drupal content types (bundle)
                     $drupalPostTypes = $this->_processor->getImporterInstance()->getPostTypes();
                     // Fetch WordPress registered post types
@@ -120,11 +128,25 @@ class Drupal2WordPress_Views {
                         $wpPostTypes['revision'],
                         $wpPostTypes['nav_menu_item']
                     );
+                    // Fetch WordPress Terms
+                    $args=array(
+                        'public'   => true
+                    );
+                    $output = 'names'; // or objects
+                    $operator = 'and';
+                    $wpTerms = get_taxonomies($args,$output,$operator);
+                    // Remove unnecessary terms for the import
+                    unset(
+                        $wpTerms['post_format']
+                    );
                     // Adding template vars
                     $TEMPLATE_VARS['drupalVersion'] = $this->_drupalVersion;
                     $TEMPLATE_VARS['drupalPrefix'] = $_SESSION['druaplDB']['prefix'];
+                    $TEMPLATE_VARS['drupalTerms'] = $drupalTerms;
                     $TEMPLATE_VARS['drupalPostTypes'] = $drupalPostTypes;
                     $TEMPLATE_VARS['wpPostTypes'] = $wpPostTypes;
+                    $TEMPLATE_VARS['wpTerms'] = $wpTerms;
+//                    wp_die('<pre>'.print_r($wpTerms, true).'</pre>');
                     break;
                 default:
                     $this->_step = 1;

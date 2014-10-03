@@ -45,6 +45,36 @@
                 <label for="default-category-name" style="display: inline-block; width: 50px;"><?php _e('Name:', 'drupal2wp'); ?></label>&nbsp;<input name="options[default_category_name]" type="text" id="default-category-name" value="<?php echo isset($_POST['options']['default_category_name']) ? $_POST['options']['default_category_name'] : 'Blog'; ?>" class="medium-text">
                 <br/>
                 <label for="default-category-slug" style="display: inline-block; width: 50px;"><?php _e('Slug:', 'drupal2wp'); ?></label>&nbsp;<input name="options[default_category_slug]" type="text" id="default-category-slug" value="<?php echo isset($_POST['options']['default_category_slug']) ? $_POST['options']['default_category_slug'] : 'blog'; ?>" class="medium-text">
+
+
+                <div id="term-associations-cage">
+                    <label style="display: block; font-weight: bold; margin-top:20px;"><?php _e('Taxonomy Association:', 'drupal2wp'); ?></label>
+                    <p class="description"><?php _e('This allows you to associate Drupal taxonomies to each available WordPress taxonomy.', 'drupal2wp'); ?></p>
+                    <p class="description"><?php _e('Each box is the WordPress taxonomy. Each list shows the available Drupal taxonomies for association.', 'drupal2wp'); ?></p>
+                    <p class="description"><strong><?php _e('Non-associated content will not be imported!', 'drupal2wp'); ?></strong></p>
+                    <?php foreach($TEMPLATE_VARS['wpTerms'] as $wpPt) : ?>
+                        <div id="term-associations-<?php echo $wpPt; ?>-cage" style="display: inline-block; width: 200px; vertical-align: top; margin: 4px;">
+                            <h4 style="margin: 4px 0 4px 8px;"><?php echo ucwords( str_replace(array('-', '_'), ' ', $wpPt) ); ?></h4>
+                            <ul class="term-associations" style="background-color: #fff;padding: 7px;border: 1px solid #CCC;border-radius: 6px;overflow: auto;max-height: 200px;margin: 0;">
+                                <?php foreach($TEMPLATE_VARS['drupalTerms'] as $dPt=>$total) :
+                                    $autoCheck = !isset($_POST['options']['associations']) ? (
+                                        ('post' === $wpPt && 'article' === $dPt)
+                                        ||
+                                        ('page' === $wpPt && 'page' === $dPt)
+                                    ) : false;
+                                    ?>
+                                    <li id="<?php echo $wpPt.'-'.$dPt; ?>-item" class="ca-<?php echo $dPt; ?>">
+                                        <label>
+                                            <input type="checkbox" id="<?php echo $wpPt.'__'.$dPt; ?>" name="options[term_associations][<?php echo $dPt; ?>]" value="<?php echo $wpPt; ?>" class="regular-checkbox" <?php echo ($autoCheck || isset($_POST['options']['term_associations'][$dPt]) && $_POST['options']['term_associations'][$dPt] == $wpPt ) ? 'checked="checked"' : ''; ?>>
+                                            <?php echo $dPt.' ('.number_format($total).')'; ?>
+                                        </label>
+                                    </li>
+                                <?php endforeach; ?>
+                            </ul>
+                        </div>
+                    <?php endforeach; ?>
+                </div>
+
             </td>
         </tr>
         <tr>
@@ -63,8 +93,8 @@
                 </label>
                 <p class="description"><?php _e('This will import comments that are associated to your content.', 'drupal2wp'); ?></p>
 
-                <div id="content-associations-cage" class="content">
-                    <label for="default-category-name" style="display: block; font-weight: bold; margin-top:20px;"><?php _e('Node/Post Type Association:', 'drupal2wp'); ?></label>
+                <div id="content-associations-cage">
+                    <label style="display: block; font-weight: bold; margin-top:20px;"><?php _e('Node/Post Type Association:', 'drupal2wp'); ?></label>
                     <p class="description"><?php _e('This allows you to associate Drupal node types to each available WordPress post type.', 'drupal2wp'); ?></p>
                     <p class="description"><?php _e('Each box is the WordPress post type. Each list shows the available Drupal types for association.', 'drupal2wp'); ?></p>
                     <p class="description"><strong><?php _e('Non-associated content will not be imported!', 'drupal2wp'); ?></strong></p>
@@ -73,7 +103,7 @@
                             <h4 style="margin: 4px 0 4px 8px;"><?php echo ucwords( str_replace(array('-', '_'), ' ', $wpPt) ); ?></h4>
                             <ul class="content-associations" style="background-color: #fff;padding: 7px;border: 1px solid #CCC;border-radius: 6px;overflow: auto;max-height: 200px;margin: 0;">
                                 <?php foreach($TEMPLATE_VARS['drupalPostTypes'] as $dPt=>$total) :
-                                    $autoCheck = !isset($_POST['options']['associations']) ? (
+                                    $autoCheck = !isset($_POST['options']['content_associations']) ? (
                                         ('post' === $wpPt && 'article' === $dPt)
                                         ||
                                         ('page' === $wpPt && 'page' === $dPt)
@@ -81,7 +111,7 @@
                                     ?>
                                     <li id="<?php echo $wpPt.'-'.$dPt; ?>-item" class="ca-<?php echo $dPt; ?>">
                                         <label>
-                                            <input type="checkbox" id="<?php echo $wpPt.'__'.$dPt; ?>" name="options[associations][<?php echo $dPt; ?>]" value="<?php echo $wpPt; ?>" class="regular-checkbox" <?php echo ($autoCheck || isset($_POST['options']['associations'][$dPt]) && $_POST['options']['associations'][$dPt] == $wpPt ) ? 'checked="checked"' : ''; ?>>
+                                            <input type="checkbox" id="<?php echo $wpPt.'__'.$dPt; ?>" name="options[content_associations][<?php echo $dPt; ?>]" value="<?php echo $wpPt; ?>" class="regular-checkbox" <?php echo ($autoCheck || isset($_POST['options']['content_associations'][$dPt]) && $_POST['options']['content_associations'][$dPt] == $wpPt ) ? 'checked="checked"' : ''; ?>>
                                             <?php echo $dPt.' ('.number_format($total).')'; ?>
                                         </label>
                                     </li>
@@ -141,6 +171,21 @@
                 }
             });
         });
+        // Add terms-associations logic
+        $(".term-associations input").on("change", function() {
+            var _tmpData = this.id.split("__");
+            var _selectedPT = _tmpData[0];
+            var _drupalPT = _tmpData[1];
+            var _isChecked = $(this).is(":checked");
+            // Disable other wp post types from being able to use the selected drupal PT
+            $("#term-associations-cage .term-associations .ca-"+_drupalPT).not("#"+_selectedPT+"-"+_drupalPT+"-item").each(function() {
+                if (_isChecked) {
+                    $(this).find("label").css("opacity",.7).find("input").prop("disabled", true);
+                } else {
+                    $(this).find("label").css("opacity", 1).find("input").prop("disabled", false);
+                }
+            });
+        });
         // Toggle change for selected import options
         $("#import-terms, #import-content").each(function() {
             if ($(this).is(":checked")) {
@@ -148,7 +193,7 @@
             }
         });
         // Toggle change for selected content-associations
-        $("#content-associations-cage .content-associations li input:checked").each(function() {
+        $("#content-associations-cage .content-associations li input:checked, #term-associations-cage .term-associations li input:checked").each(function() {
             $(this).change();
         });
 
