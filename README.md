@@ -20,7 +20,6 @@ As I worked with this plugin I simplified and improved many parts of the process
 ## Import Options
 * **Content (Drupal nodes)** 
     - You can associate Drupal node types to WordPress post types.
-    - You can associate Drupal vocabulary types to WordPress taxonomies.
     - All nodes are imported with their original owner user id (if users are imported, otherwise you can choose the user ID to associate all content to), timestamp, published or unpublished state. 
     - With regards to SEO, Drupal's leading 'content/' prefix for any page is removed.
         - Drupal was more forgiving with malformed aliases (slugs), this plugin will clean the alias to a proper slug.
@@ -28,6 +27,7 @@ As I worked with this plugin I simplified and improved many parts of the process
     - Comments on Content (up to 11 levels of threaded comments)
         - Only approved comments are imported due to the high level of spam which Drupal sites might endure (in Drupal this means all comments with status 1)
 * **Terms**
+    - You can associate Drupal vocabulary types to WordPress taxonomies.
     - _Categories_ 
         - WordPress requires that any blog post is associated with at least one category, and not just a tag, hence the script will create a default category (you get to decide what it is) and associate all of the content created into that category.
     - _Tags_
