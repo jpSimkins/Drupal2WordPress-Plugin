@@ -12,7 +12,7 @@ As I worked with this plugin I simplified and improved many parts of the process
 * Import options
     - Choose from importing terms, content, media, comments, and/or users
         - comments and media can only be imported if content is
-    - Associate WordPress taxonomies and post types to Drupal node types nd vocabulary
+    - Associate WordPress taxonomies and post types to Drupal node types and vocabulary
 * Cleans Drupal aliases
     - Outputs .htaccess rewrite rules for alias changes
 
