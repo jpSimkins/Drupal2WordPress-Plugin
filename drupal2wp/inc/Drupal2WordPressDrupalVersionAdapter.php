@@ -543,7 +543,7 @@ abstract class Drupal2WordPressDrupalVersionAdapter implements Drupal2WordPressD
             // Flush the rewrite rules to use correct permalinks
             flush_rewrite_rules(true);
             // Remove Session data
-//        unset($_SESSION['druaplDB'], $_SESSION['options']);
+            unset($_SESSION['druaplDB'], $_SESSION['options']);
         }
     }
 
