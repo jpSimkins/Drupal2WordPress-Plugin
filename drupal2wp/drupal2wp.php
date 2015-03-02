@@ -5,6 +5,8 @@
  * Version: 1.1
  * Author: Jeremy Simkins <jpSimkins@gmail.com>
  * Author URI: http://jeremysimkins.com
+ * Text Domain: drupal2wp
+ * Domain Path: /languages/
  * License: GPL2
  */
 
@@ -33,6 +35,8 @@ define('DRUPAL2WP_VIEWS_DIRECTORY', plugin_dir_path(DRUPAL2WP_FILE).'views/');
 define('DRUPAL2WP_DIRECTORY_URL', plugin_dir_url(DRUPAL2WP_FILE));
 // Register Autoloader
 spl_autoload_register('drupal2wp_autoloader');
+// L10n
+add_action( 'plugins_loaded', 'drupal2wp_l10n' );
 // initialize the plugin
 add_action('init', 'drupal2wp_init', 50); // set to 50 to make sure all other plugins initialize first
 
@@ -54,6 +58,10 @@ function drupal2wp_autoloader($class) {
 function drupal2wp_init() {
     global $drupal2wp;
     $drupal2wp = new Drupal2WordPress();
+}
+
+function drupal2wp_l10n() {
+    load_plugin_textdomain( 'drupal2wp', false, dirname( plugin_basename(DRUPAL2WP_FILE) ) . '/languages' );
 }
 
 function debug($data, $return=false, $echo=false, $showCalledFrom=true) {

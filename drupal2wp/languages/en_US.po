@@ -1,0 +1,677 @@
+msgid ""
+msgstr ""
+"Project-Id-Version: Drupal 2 WordPress Page Tags Support\n"
+"POT-Creation-Date: 2015-03-02 18:06-0500\n"
+"PO-Revision-Date: 2015-03-02 18:07-0500\n"
+"Last-Translator: \n"
+"Language-Team: \n"
+"Language: en_US\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"X-Generator: Poedit 1.7.4\n"
+"X-Poedit-Basepath: ..\n"
+"X-Poedit-SourceCharset: UTF-8\n"
+"X-Poedit-KeywordsList: __;_e;_n:1,2;_x:1,2c;_ex:1,2c;_nx:4c,1,2;esc_attr__;"
+"esc_attr_e;esc_attr_x:1,2c;esc_html__;esc_html_e;esc_html_x:1,2c;_n_noop:1,2;"
+"_nx_noop:3c,1,2;__ngettext_noop:1,2\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+"X-Poedit-SearchPath-0: .\n"
+"X-Poedit-SearchPathExcluded-0: *.js\n"
+
+#: inc/Drupal2WordPress.php:54 views/body.php:2
+msgid "Drupal 2 WordPress"
+msgstr "Drupal 2 WordPress"
+
+#: inc/Drupal2WordPress.php:54
+msgid ""
+"Import <strong>users, posts, pages, comments, media, categories, and tags</"
+"strong> from a Drupal database."
+msgstr ""
+"Import <strong>users, posts, pages, comments, media, categories, and tags</"
+"strong> from a Drupal database."
+
+#: inc/Drupal2WordPressDrupalImporter_7.php:143
+#: inc/Drupal2WordPressDrupalImporter_7.php:353
+#, php-format
+msgid "ID: %d. Taxonomy slug is suffixed with %s (%s)"
+msgstr "ID: %d. Taxonomy slug is suffixed with %s (%s)"
+
+#: inc/Drupal2WordPressDrupalImporter_7.php:205
+#: inc/Drupal2WordPressDrupalImporter_7.php:419
+#, php-format
+msgid "Could not load the term by ID: %d"
+msgstr "Could not load the term by ID: %d"
+
+#: inc/Drupal2WordPressDrupalImporter_7.php:212
+#: inc/Drupal2WordPressDrupalImporter_7.php:426
+#, php-format
+msgid "Could not get the term link for ID: %d. Returned error: %s"
+msgstr "Could not get the term link for ID: %d. Returned error: %s"
+
+#: inc/Drupal2WordPressDrupalImporter_7.php:222
+#: inc/Drupal2WordPressDrupalImporter_7.php:437
+msgid "Tags Imported"
+msgstr "Tags Imported"
+
+#: inc/Drupal2WordPressDrupalImporter_7.php:222
+#: inc/Drupal2WordPressDrupalImporter_7.php:437
+msgid "Also optimized slugs per WordPress specifications"
+msgstr "Also optimized slugs per WordPress specifications"
+
+#: inc/Drupal2WordPressDrupalImporter_7.php:224
+#: inc/Drupal2WordPressDrupalImporter_7.php:439
+msgid "Tags Failed to Import"
+msgstr "Tags Failed to Import"
+
+#: inc/Drupal2WordPressDrupalImporter_7.php:265
+#: inc/Drupal2WordPressDrupalImporter_7.php:482
+msgid "Categories Imported"
+msgstr "Categories Imported"
+
+#: inc/Drupal2WordPressDrupalImporter_7.php:267
+#: inc/Drupal2WordPressDrupalImporter_7.php:270
+#: inc/Drupal2WordPressDrupalImporter_7.php:484
+#: inc/Drupal2WordPressDrupalImporter_7.php:487
+msgid "Categories Failed to Import"
+msgstr "Categories Failed to Import"
+
+#: inc/Drupal2WordPressDrupalImporter_7.php:267
+#: inc/Drupal2WordPressDrupalImporter_7.php:484
+msgid "Attachment failed"
+msgstr "Attachment failed"
+
+#: inc/Drupal2WordPressDrupalImporter_7.php:270
+#: inc/Drupal2WordPressDrupalImporter_7.php:487
+#: inc/Drupal2WordPressDrupalImporter_7.php:549
+#: inc/Drupal2WordPressDrupalImporter_7.php:729
+msgid "All failed"
+msgstr "All failed"
+
+#: inc/Drupal2WordPressDrupalImporter_7.php:547
+msgid "Content Imported"
+msgstr "Content Imported"
+
+#: inc/Drupal2WordPressDrupalImporter_7.php:549
+msgid "Content Failed to Import"
+msgstr "Content Failed to Import"
+
+#: inc/Drupal2WordPressDrupalImporter_7.php:671
+#, php-format
+msgid "ID: %d"
+msgstr "ID: %d"
+
+#: inc/Drupal2WordPressDrupalImporter_7.php:724
+msgid "Tags & Content Relationships Imported"
+msgstr "Tags & Content Relationships Imported"
+
+#: inc/Drupal2WordPressDrupalImporter_7.php:729
+msgid "Tags & Content Relationships Failed to Import"
+msgstr "Tags & Content Relationships Failed to Import"
+
+#: inc/Drupal2WordPressDrupalImporter_7.php:755
+msgid "Tag Count Updated"
+msgstr "Tag Count Updated"
+
+#: inc/Drupal2WordPressDrupalImporter_7.php:757
+msgid "Tag Count Failed to Update"
+msgstr "Tag Count Failed to Update"
+
+#: inc/Drupal2WordPressDrupalImporter_7.php:781
+msgid "Posted Type Updated"
+msgstr "Posted Type Updated"
+
+#: inc/Drupal2WordPressDrupalImporter_7.php:783
+msgid "Posted Type Failed to Update"
+msgstr "Posted Type Failed to Update"
+
+#: inc/Drupal2WordPressDrupalImporter_7.php:806
+msgid "Comments Imported"
+msgstr "Comments Imported"
+
+#: inc/Drupal2WordPressDrupalImporter_7.php:893
+msgid "Content Comments Count Updated"
+msgstr "Content Comments Count Updated"
+
+#: inc/Drupal2WordPressDrupalImporter_7.php:895
+msgid "Content Comments Count Failed to Update"
+msgstr "Content Comments Count Failed to Update"
+
+#: inc/Drupal2WordPressDrupalImporter_7.php:913
+msgid "Media Imported"
+msgstr "Media Imported"
+
+#: inc/Drupal2WordPressDrupalImporter_7.php:915
+msgid "No Media was Found for Import"
+msgstr "No Media was Found for Import"
+
+#: inc/Drupal2WordPressDrupalImporter_7.php:928
+msgid "No Drupal files path defined to import media."
+msgstr "No Drupal files path defined to import media."
+
+#: inc/Drupal2WordPressDrupalImporter_7.php:954
+#, php-format
+msgid "Failed to import media file: %s - %s"
+msgstr "Failed to import media file: %s - %s"
+
+#: inc/Drupal2WordPressDrupalImporter_7.php:1106
+msgid "Users Imported"
+msgstr "Users Imported"
+
+#: inc/Drupal2WordPressDrupalImporter_7.php:1108
+msgid "Users failed to Import"
+msgstr "Users failed to Import"
+
+#: inc/Drupal2WordPressDrupalVersionAdapter.php:106
+#: inc/Drupal2WordPress_DrupalImporter.php:74
+msgid "Drupal database details are missing"
+msgstr "Drupal database details are missing"
+
+#: inc/Drupal2WordPressDrupalVersionAdapter.php:177
+msgid "WordPress Tables Truncated"
+msgstr "WordPress Tables Truncated"
+
+#: inc/Drupal2WordPressDrupalVersionAdapter.php:177
+msgid ""
+"This is required as this ensures content IDs are synced across all systems"
+msgstr ""
+"This is required as this ensures content IDs are synced across all systems"
+
+#: inc/Drupal2WordPressDrupalVersionAdapter.php:377
+#, php-format
+msgid ""
+"Failed to import content media file: %s. Updated path to point to %s. - %s"
+msgstr ""
+"Failed to import content media file: %s. Updated path to point to %s. - %s"
+
+#: inc/Drupal2WordPressDrupalVersionAdapter.php:379
+#, php-format
+msgid "Failed to import content media file: %s - %s"
+msgstr "Failed to import content media file: %s - %s"
+
+#: inc/Drupal2WordPressDrupalVersionAdapter.php:405
+#, php-format
+msgid "Failed to update content for post ID: %d"
+msgstr "Failed to update content for post ID: %d"
+
+#: inc/Drupal2WordPressDrupalVersionAdapter.php:447
+#, php-format
+msgid "Failed to load media file: %s - %s"
+msgstr "Failed to load media file: %s - %s"
+
+#: inc/Drupal2WordPressDrupalVersionAdapter.php:470
+#, php-format
+msgid "Invalid extension (%s) for media file."
+msgstr "Invalid extension (%s) for media file."
+
+#: inc/Drupal2WordPressDrupalVersionAdapter.php:514
+msgid "Import Complete!"
+msgstr "Import Complete!"
+
+#: inc/Drupal2WordPressDrupalVersionAdapter.php:515
+msgid ""
+"Some Drupal setups have pages with tags associated to them; WordPress does "
+"not. If you want to add tag support to pages and not using the Custom "
+"Content Type Manager plugin, enable the second plugin: Drupal 2 WordPress "
+"Page Tags Support."
+msgstr ""
+"Some Drupal setups have pages with tags associated to them; WordPress does "
+"not. If you want to add tag support to pages and not using the Custom "
+"Content Type Manager plugin, enable the second plugin: Drupal 2 WordPress "
+"Page Tags Support."
+
+#: inc/Drupal2WordPressDrupalVersionAdapter.php:516
+msgid ""
+"For security reasons, please disable and/or remove this plugin as the import "
+"process is complete."
+msgstr ""
+"For security reasons, please disable and/or remove this plugin as the import "
+"process is complete."
+
+#: inc/Drupal2WordPressDrupalVersionAdapter.php:524
+#, php-format
+msgid "%d Import Issue"
+msgid_plural "%d Import Issues"
+msgstr[0] "%d Import Issue"
+msgstr[1] "%d Import Issues"
+
+#: inc/Drupal2WordPressDrupalVersionAdapter.php:525
+msgid ""
+"These issues may be minimal to the import process. Please verify the issues."
+msgstr ""
+"These issues may be minimal to the import process. Please verify the issues."
+
+#: inc/Drupal2WordPressDrupalVersionAdapter.php:556
+#, php-format
+msgid "Add this to your .htaccess file to have proper 301 redirects (%d total)"
+msgstr ""
+"Add this to your .htaccess file to have proper 301 redirects (%d total)"
+
+#: inc/Drupal2WordPressDrupalVersionAdapter.php:557
+msgid ""
+"This is only the rewrite rules, you will have to make sure you have rewrite "
+"enabled."
+msgstr ""
+"This is only the rewrite rules, you will have to make sure you have rewrite "
+"enabled."
+
+#: inc/Drupal2WordPressDrupalVersionAdapter.php:564
+msgid "No rewrites are necessary."
+msgstr "No rewrites are necessary."
+
+#: inc/Drupal2WordPress_DrupalImporter.php:91
+msgid "Invalid Drupal version for importing"
+msgstr "Invalid Drupal version for importing"
+
+#: inc/Drupal2WordPress_DrupalImporter.php:95
+msgid "Drupal version details are missing"
+msgstr "Drupal version details are missing"
+
+#: inc/Drupal2WordPress_ViewProcessor.php:150
+msgid "Invalid POST response."
+msgstr "Invalid POST response."
+
+#: inc/Drupal2WordPress_ViewProcessor.php:194
+msgid "No Drupal settings found."
+msgstr "No Drupal settings found."
+
+#: inc/Drupal2WordPress_ViewProcessor.php:197
+#: inc/Drupal2WordPress_ViewProcessor.php:235
+msgid "Form validation failed."
+msgstr "Form validation failed."
+
+#: inc/Drupal2WordPress_ViewProcessor.php:232
+msgid "No import options selected."
+msgstr "No import options selected."
+
+#: inc/Drupal2WordPress_Views.php:101
+msgid "You do not have sufficient permissions to access this page."
+msgstr "You do not have sufficient permissions to access this page."
+
+#: inc/Drupal2WordPress_Views.php:182
+msgid "Invalid Step for importing"
+msgstr "Invalid Step for importing"
+
+#: views/body.php:3
+msgid "Imports Drupal content into WordPress"
+msgstr "Imports Drupal content into WordPress"
+
+#: views/body.php:33
+msgid "No view found for step"
+msgstr "No view found for step"
+
+#: views/step1.php:10
+msgid "Drupal DB Settings"
+msgstr "Drupal DB Settings"
+
+#: views/step1.php:11
+msgid "Database settings to connect to the Drupal database."
+msgstr "Database settings to connect to the Drupal database."
+
+#: views/step1.php:15
+msgid "Database Host"
+msgstr "Database Host"
+
+#: views/step1.php:19
+msgid "Database Name"
+msgstr "Database Name"
+
+#: views/step1.php:23
+msgid "Database Username"
+msgstr "Database Username"
+
+#: views/step1.php:27
+msgid "Database Password"
+msgstr "Database Password"
+
+#: views/step1.php:31
+msgid "Database Prefix"
+msgstr "Database Prefix"
+
+#: views/step1.php:35 views/step2.php:24
+msgid "Drupal Version"
+msgstr "Drupal Version"
+
+#: views/step1.php:47
+msgid "Third-party Options"
+msgstr "Third-party Options"
+
+#: views/step1.php:49
+msgid ""
+"Select the third-party options you would like to use during this import."
+msgstr ""
+"Select the third-party options you would like to use during this import."
+
+#: views/step1.php:63
+msgid "Proceed to Next Step"
+msgstr "Proceed to Next Step"
+
+#: views/step1.php:64
+msgid "Don't worry, nothing is being imported yet."
+msgstr "Don't worry, nothing is being imported yet."
+
+#: views/step2.php:11
+msgid "Drupal Checks"
+msgstr "Drupal Checks"
+
+#: views/step2.php:12
+msgid "Please verify the information is correct."
+msgstr "Please verify the information is correct."
+
+#: views/step2.php:16
+msgid "Drupal DB Status"
+msgstr "Drupal DB Status"
+
+#: views/step2.php:17
+msgid "Connection Successful"
+msgstr "Connection Successful"
+
+#: views/step2.php:20
+msgid "Drupal DB Prefix"
+msgstr "Drupal DB Prefix"
+
+#: views/step2.php:29
+msgid "Import Options"
+msgstr "Import Options"
+
+#: views/step2.php:30
+msgid "Controls the import process"
+msgstr "Controls the import process"
+
+#: views/step2.php:34
+msgid "Import Terms"
+msgstr "Import Terms"
+
+#: views/step2.php:37
+msgid "Imports categories and tags"
+msgstr "Imports categories and tags"
+
+#: views/step2.php:43
+msgid "Default Category:"
+msgstr "Default Category:"
+
+#: views/step2.php:44
+msgid ""
+"This is the default category posts are assigned to. Required by WordPress."
+msgstr ""
+"This is the default category posts are assigned to. Required by WordPress."
+
+#: views/step2.php:45
+msgid "Name:"
+msgstr "Name:"
+
+#: views/step2.php:47
+msgid "Slug:"
+msgstr "Slug:"
+
+#: views/step2.php:51
+msgid "Taxonomy Association:"
+msgstr "Taxonomy Association:"
+
+#: views/step2.php:52
+msgid ""
+"This allows you to associate Drupal taxonomies to each available WordPress "
+"taxonomy."
+msgstr ""
+"This allows you to associate Drupal taxonomies to each available WordPress "
+"taxonomy."
+
+#: views/step2.php:53
+msgid ""
+"Each box is the WordPress taxonomy. Each list shows the available Drupal "
+"taxonomies for association."
+msgstr ""
+"Each box is the WordPress taxonomy. Each list shows the available Drupal "
+"taxonomies for association."
+
+#: views/step2.php:54 views/step2.php:95 views/step2.php:323
+msgid "Non-associated content will not be imported!"
+msgstr "Non-associated content will not be imported!"
+
+#: views/step2.php:82
+msgid "Import Content"
+msgstr "Import Content"
+
+#: views/step2.php:85
+msgid "Import post_types, comments, etc."
+msgstr "Import post_types, comments, etc."
+
+#: views/step2.php:92
+msgid "Node/Post Type Association:"
+msgstr "Node/Post Type Association:"
+
+#: views/step2.php:93
+msgid ""
+"This allows you to associate Drupal node types to each available WordPress "
+"post type."
+msgstr ""
+"This allows you to associate Drupal node types to each available WordPress "
+"post type."
+
+#: views/step2.php:94
+msgid ""
+"Each box is the WordPress post type. Each list shows the available Drupal "
+"types for association."
+msgstr ""
+"Each box is the WordPress post type. Each list shows the available Drupal "
+"types for association."
+
+#: views/step2.php:121
+msgid "Associate by Title Search:"
+msgstr "Associate by Title Search:"
+
+#: views/step2.php:123
+msgid ""
+"This will move content with any part of a title match to a specified "
+"WordPress post type. This is case-insensitive and the match can be any part "
+"of the title."
+msgstr ""
+"This will move content with any part of a title match to a specified "
+"WordPress post type. This is case-insensitive and the match can be any part "
+"of the title."
+
+#: views/step2.php:125
+msgid "Add Title Association"
+msgstr "Add Title Association"
+
+#: views/step2.php:132 views/step2.php:161 views/step2.php:190
+msgid "Title:"
+msgstr "Title:"
+
+#: views/step2.php:137 views/step2.php:166 views/step2.php:195
+msgid "Associate To:"
+msgstr "Associate To:"
+
+#: views/step2.php:147 views/step2.php:176 views/step2.php:207
+msgid "Remove From Title"
+msgstr "Remove From Title"
+
+#: views/step2.php:149 views/step2.php:178 views/step2.php:209
+msgid "-OR-"
+msgstr "-OR-"
+
+#: views/step2.php:151 views/step2.php:180 views/step2.php:211
+msgid "Replace With:"
+msgstr "Replace With:"
+
+#: views/step2.php:202 views/step2.php:257 views/step2.php:268
+#: views/step2.php:278
+msgid "Remove Title Association"
+msgstr "Remove Title Association"
+
+#: views/step2.php:220
+msgid "Include Comments"
+msgstr "Include Comments"
+
+#: views/step2.php:222
+msgid "This will import comments that are associated to your content."
+msgstr "This will import comments that are associated to your content."
+
+#: views/step2.php:227
+msgid "Include Media"
+msgstr "Include Media"
+
+#: views/step2.php:229
+msgid "This will import media assets that are associated to your content."
+msgstr "This will import media assets that are associated to your content."
+
+#: views/step2.php:236
+msgid "Import content images into the media manager"
+msgstr "Import content images into the media manager"
+
+#: views/step2.php:237
+msgid ""
+"This will import img tags in the content into the media manager that matches "
+"the provided paths. This will update the image path to the new attachment "
+"location."
+msgstr ""
+"This will import img tags in the content into the media manager that matches "
+"the provided paths. This will update the image path to the new attachment "
+"location."
+
+#: views/step2.php:238
+msgid ""
+"The find path should be exactly as it is in the src tag of the img tags. "
+"Relative URLs will use the Drupal Site URL for download."
+msgstr ""
+"The find path should be exactly as it is in the src tag of the img tags. "
+"Relative URLs will use the Drupal Site URL for download."
+
+#: views/step2.php:241
+msgid "Druapl Site URL:"
+msgstr "Druapl Site URL:"
+
+#: views/step2.php:244
+msgid "This is only used for relative pathing mapping below."
+msgstr "This is only used for relative pathing mapping below."
+
+#: views/step2.php:247
+msgid "Add Title Content Media import"
+msgstr "Add Title Content Media import"
+
+#: views/step2.php:254 views/step2.php:265 views/step2.php:275
+msgid "Find:"
+msgstr "Find:"
+
+#: views/step2.php:283
+msgid "Media asset fail-safe location"
+msgstr "Media asset fail-safe location"
+
+#: views/step2.php:284
+msgid ""
+"This is the path to replace for assets that fail to import into the media "
+"manager."
+msgstr ""
+"This is the path to replace for assets that fail to import into the media "
+"manager."
+
+#: views/step2.php:286
+msgid "Drupal Files Directory URL:"
+msgstr "Drupal Files Directory URL:"
+
+#: views/step2.php:290 views/step2.php:301
+#, php-format
+msgid "(ie: %s)"
+msgstr "(ie: %s)"
+
+#: views/step2.php:293
+msgid "This is the URL location of the Drupal files directory."
+msgstr "This is the URL location of the Drupal files directory."
+
+#: views/step2.php:294
+msgid ""
+"This is to import the media associated to your content through views and is "
+"meant to be the current URL for the Drupal site. Attached media is imported "
+"into the Media Manager of WordPress."
+msgstr ""
+"This is to import the media associated to your content through views and is "
+"meant to be the current URL for the Drupal site. Attached media is imported "
+"into the Media Manager of WordPress."
+
+#: views/step2.php:297
+msgid "WordPress Asset URL:"
+msgstr "WordPress Asset URL:"
+
+#: views/step2.php:304
+msgid "This is where the Drupal files are copied to your WordPress install."
+msgstr "This is where the Drupal files are copied to your WordPress install."
+
+#: views/step2.php:305
+msgid ""
+"This is used with Drupal Files Directory URL to find and replace the URLs to "
+"fix assets in the content that is not attached."
+msgstr ""
+"This is used with Drupal Files Directory URL to find and replace the URLs to "
+"fix assets in the content that is not attached."
+
+#: views/step2.php:313
+msgid "Import Users"
+msgstr "Import Users"
+
+#: views/step2.php:320
+msgid "User Roles Association:"
+msgstr "User Roles Association:"
+
+#: views/step2.php:321
+msgid ""
+"This allows you to associate Drupal user roles to each available WordPress "
+"user role."
+msgstr ""
+"This allows you to associate Drupal user roles to each available WordPress "
+"user role."
+
+#: views/step2.php:322
+msgid ""
+"Each box is the WordPress user role. Each list shows the available Drupal "
+"user roles for association."
+msgstr ""
+"Each box is the WordPress user role. Each list shows the available Drupal "
+"user roles for association."
+
+#: views/step2.php:351
+msgid "Enabled Users Only"
+msgstr "Enabled Users Only"
+
+#: views/step2.php:353
+msgid "All users are imported by default. This will only import enabled users."
+msgstr ""
+"All users are imported by default. This will only import enabled users."
+
+#: views/step2.php:362
+msgid "Associated Content to User ID"
+msgstr "Associated Content to User ID"
+
+#: views/step2.php:365
+msgid ""
+"If not importing users, you need to associate content to a specific user ID. "
+"If no ID is entered, all content will be imported with the ID of the Drupal "
+"user (this is not ideal)"
+msgstr ""
+"If not importing users, you need to associate content to a specific user ID. "
+"If no ID is entered, all content will be imported with the ID of the Drupal "
+"user (this is not ideal)"
+
+#: views/step2.php:373
+msgid "Start Import"
+msgstr "Start Import"
+
+#: views/step2.php:374
+msgid ""
+"Proceeding to the next step will start the import process. This can take a "
+"long time depending on the size of the Drupal database."
+msgstr ""
+"Proceeding to the next step will start the import process. This can take a "
+"long time depending on the size of the Drupal database."
+
+#: views/step3.php:1
+msgid "Import in Progress"
+msgstr "Import in Progress"
+
+#: views/step3.php:2
+msgid "This can take a long time depending on the size of the Drupal database."
+msgstr ""
+"This can take a long time depending on the size of the Drupal database."
+
+#: views/step3.php:3
+msgid "Import status will be outputted below."
+msgstr "Import status will be outputted below."

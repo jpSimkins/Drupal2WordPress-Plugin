@@ -85,8 +85,8 @@ This is the workflow I used to develop this plugin.
 - [x] Allow for custom taxonomy association
 - [x] Import media sources
 - [x] Add hooks to allow for easy customization for unique setups
+- [x] L10n
 - [ ] Add multi-lingual import option (site I'm working on uses two languages so I have duplicate content as each post has two versions)
-- [ ] L10n
 
 ## Known Issues
 - [ ] Long titles do not return a valid slug. This is WordPress behavior.
