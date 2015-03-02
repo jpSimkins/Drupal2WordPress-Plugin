@@ -14,7 +14,7 @@ As I worked with this plugin I simplified and improved many parts of the process
         - comments and media can only be imported if content is
     - Associate WordPress taxonomies and post types to Drupal node types and vocabulary
 * Cleans Drupal aliases
-    - Outputs .htaccess rewrite rules for alias changes
+    - Outputs `.htaccess` rewrite rules for alias changes
 
 
 ## Import Options
@@ -29,7 +29,7 @@ As I worked with this plugin I simplified and improved many parts of the process
     - Images are automatically imported into the media manager.
         - img tags in content are also auto imported to the media manager and updated in the content.
             - To prevent stealing images from third-party sites, you are to add basic path presets to find and replace.
-    - You can move content by title prefix to different post_types.
+    - You can move content by title prefix to different `post_types`.
 * **Terms**
     - You can associate Drupal vocabulary types to WordPress taxonomies.
     - _Categories_ 
@@ -68,12 +68,12 @@ This is the workflow I used to develop this plugin.
     - Basically you want to have your taxonomies setup for the import process.
 - Create needed post types for import
 - Create taxonomies for import
-- Run this pluing to start the import process
+- Run this plugin to start the import process
 - Select desired options
 - Associate the taxonomies (optional)
 - Associate the post types (optional)
 - Import data
-- Add any .htaccess edits if necessary
+- Add any `.htaccess` edits if necessary
 - Enjoy :)
 
 ## Todo
