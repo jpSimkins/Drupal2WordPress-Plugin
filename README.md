@@ -77,12 +77,12 @@ This is the workflow I used to develop this plugin.
 - Enjoy :)
 
 ## Todo
+- [x] Add Drupal version selector to allow for 6 and 8 to be added
 - [x] Allow for custom post type association
 - [x] Allow for custom taxonomy association
 - [x] Import media sources
 - [x] Add hooks to allow for easy customization for unique setups
 - [ ] Add multi-lingual import option (site I'm working on uses two languages so I have duplicate content as each post has two versions)
-- [x] Add Drupal version selector to allow for 6 and 8 to be added
 - [ ] L10n
 
 ## Known Issues
