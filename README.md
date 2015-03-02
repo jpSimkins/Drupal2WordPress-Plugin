@@ -1,8 +1,8 @@
 Drupal2WordPress Plugin 
 =======================
 
-WordPress 3.9+ plugin for importing Drupal 7
-- Tested only on 3.9+ but may work for lower versions.
+WordPress 3.9/ 4.x+  plugin for importing Drupal 7
+- Tested on 3.9+ but may work for lower versions.
 
 This plugin was originally based off the repo: https://github.com/lirantal/Drupal2WordPress
 
@@ -16,6 +16,8 @@ As I worked with this plugin I simplified and improved many parts of the process
     - Associate WordPress taxonomies and post types to Drupal node types and vocabulary
 * Cleans Drupal aliases
     - Outputs `.htaccess` rewrite rules for alias changes
+* Supports Drupal Version 7
+ - Designed to be pluggable to work with other versions
 
 
 ## Import Options
