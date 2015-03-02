@@ -1,7 +1,8 @@
 Drupal2WordPress Plugin 
 =======================
 
-WordPress 3.8+ plugin for importing Drupal 7 (Yes, WordPress 4.x+ too)
+WordPress 3.9+ plugin for importing Drupal 7
+- Tested only on 3.9+ but may work for lower versions.
 
 This plugin was originally based off the repo: https://github.com/lirantal/Drupal2WordPress
 
