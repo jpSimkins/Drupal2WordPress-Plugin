@@ -1,5 +1,8 @@
 <?php
 
+// Deny direct access
+defined('ABSPATH') or die("No script kiddies please!");
+
 /**
  * Class Drupal2WordPress_ViewProcessor
  * Processes the steps of the plugin
@@ -24,6 +27,18 @@ class Drupal2WordPress_ViewProcessor {
     private $errors = array();
 
     /**
+     * Success messages
+     * @var array
+     */
+    private $success = array();
+
+    /**
+     * Notice messages
+     * @var array
+     */
+    private $notice = array();
+
+    /**
      * Drupal DB instance
      * @var Drupal2WordPress_DrupalImporter
      */
@@ -43,6 +58,78 @@ class Drupal2WordPress_ViewProcessor {
      */
     public function getImporterInstance() {
         return $this->_drupalImporter;
+    }
+
+    /**
+     * Adds an error
+     * @param $error
+     */
+    function addError($error) {
+        $this->errors[] = $error;
+    }
+
+    /**
+     * Checks if errors are present
+     * @return bool
+     */
+    function hasErrors() {
+        return !empty($this->errors);
+    }
+
+    /**
+     * Returns the errors
+     * @return array
+     */
+    function getErrors() {
+        return $this->errors;
+    }
+
+    /**
+     * Adds an notice
+     * @param $notice
+     */
+    function addNotice($notice) {
+        $this->notice[] = $notice;
+    }
+
+    /**
+     * Checks if notices are present
+     * @return bool
+     */
+    function hasNotices() {
+        return !empty($this->notice);
+    }
+
+    /**
+     * Returns the notices
+     * @return array
+     */
+    function getNotices() {
+        return $this->notice;
+    }
+
+    /**
+     * Adds a success message
+     * @param $success
+     */
+    function addSuccess($success) {
+        $this->success[] = $success;
+    }
+
+    /**
+     * Checks if success messages are present
+     * @return bool
+     */
+    function hasSuccess() {
+        return !empty($this->success);
+    }
+
+    /**
+     * Returns the errors
+     * @return array
+     */
+    function getSuccess() {
+        return $this->success;
     }
 
     /**
@@ -74,22 +161,6 @@ class Drupal2WordPress_ViewProcessor {
     }
 
     /**
-     * Checks if errors are present
-     * @return bool
-     */
-    function hasErrors() {
-        return !empty($this->errors);
-    }
-
-    /**
-     * Returns the errors
-     * @return array
-     */
-    function getErrors() {
-        return $this->errors;
-    }
-
-    /**
      * Processes Step1 data
      * Runs test to make sure the connection to the Drupal database is working
      */
@@ -97,26 +168,36 @@ class Drupal2WordPress_ViewProcessor {
         // Only process with POST
         if (!empty($_POST)) {
             // Validate the nonce
-            if (wp_verify_nonce( $_POST['_wpnonce'], 'drupal2wp-step1-nonce' )) {
-                $drupalDBData = isset($_POST['druaplDB']) ? $_POST['druaplDB'] : array();
-                if (!empty($drupalDBData)) {
-                    // Save to session
-                    $_SESSION['druaplDB'] = $drupalDBData;
-                    // Init the Drupal importer
-                    $this->_drupalImporter = new Drupal2WordPress_DrupalImporter();
-                    // Check the DB connection
-                    if (!$this->_drupalImporter->check()) {
-                        throw new Exception('Failed to connect to the Drupal database.');
+            if (isset($_POST['_drupal2wp_nonce'])) {
+                if (wp_verify_nonce($_POST['_drupal2wp_nonce'], 'drupal2wp-step1-nonce')) {
+                    // Handle third-party options
+                    $thirdPartyOptions = isset($_POST['thirdPartyOptions']) ? $_POST['thirdPartyOptions'] : array();
+                    if (!empty($thirdPartyOptions)) {
+                        // Save to session
+                        $_SESSION['thirdPartyOptions'] = $thirdPartyOptions;
+                    }
+                    // Handle DB settings
+                    $drupalDBData = isset($_POST['druaplDB']) ? $_POST['druaplDB'] : array();
+                    if (!empty($drupalDBData)) {
+                        // Save to session
+                        $_SESSION['druaplDB'] = $drupalDBData;
+                        // Init the Drupal importer
+                        $this->_drupalImporter = new Drupal2WordPress_DrupalImporter();
+                        // Check the DB connection
+                        if (!$this->_drupalImporter->check()) {
+                            throw new Exception('Failed to connect to the Drupal database.');
+                        } else {
+                            // Process step1
+                            $this->nextStep = 2;
+                        }
                     } else {
-                        // Process step1
-                        $this->nextStep = 2;
+                        throw new Exception(__('No Drupal settings found.', 'drupal2wp'));
                     }
                 } else {
-                    throw new Exception( __('No Drupal settings found.', 'drupal2wp') );
+                    throw new Exception( __('Form validation failed.', 'drupal2wp') );
                 }
-//                wp_die("STEP1: received <pre>".print_r($_POST, true)."</pre>  <pre>".print_r($_SESSION, true)."</pre>  <pre>".print_r($this->_drupalDB, true)."</pre> from your browser.");
             } else {
-                throw new Exception( __('Form validation failed.', 'drupal2wp') );
+                do_action('drupal2wp_view_step1_submit', $this);
             }
         }
     }
@@ -130,28 +211,31 @@ class Drupal2WordPress_ViewProcessor {
         // Only process with POST
         if (!empty($_POST)) {
             // Validate the nonce
-            if (wp_verify_nonce( $_POST['_wpnonce'], 'drupal2wp-step2-nonce' )) {
-                $importOptions = isset($_POST['options']) ? $_POST['options'] : array();
-                if (!empty($importOptions)) {
-                    // Save to session
-                    $_SESSION['options'] = $importOptions;
-                    // Init the Drupal importer
-                    $this->_drupalImporter = new Drupal2WordPress_DrupalImporter();
-                    // Check the DB connection
-                    if (!$this->_drupalImporter->check()) {
-                        throw new Exception('Failed to connect to the Drupal database.');
+            if (isset($_POST['_drupal2wp_nonce'])) {
+                if (wp_verify_nonce($_POST['_drupal2wp_nonce'], 'drupal2wp-step2-nonce')) {
+                    $importOptions = isset($_POST['options']) ? $_POST['options'] : array();
+                    if (!empty($importOptions)) {
+                        // Save to session
+                        $_SESSION['options'] = $importOptions;
+                        // Init the Drupal importer
+                        $this->_drupalImporter = new Drupal2WordPress_DrupalImporter();
+                        // Check the DB connection
+                        if (!$this->_drupalImporter->check()) {
+                            throw new Exception('Failed to connect to the Drupal database.');
+                        } else {
+                            // Process step2
+                            $this->nextStep = 3;
+                        }
                     } else {
                         // Process step2
-                        $this->nextStep = 3;
+                        $this->nextStep = 2;
+                        throw new Exception(__('No import options selected.', 'drupal2wp'));
                     }
                 } else {
-                    // Process step2
-                    $this->nextStep = 2;
-                    throw new Exception( __('No import options selected.', 'drupal2wp') );
+                    throw new Exception(__('Form validation failed.', 'drupal2wp'));
                 }
-//                wp_die("STEP2: Post: <pre>".print_r($_POST, true)."</pre>  Session: <pre>".print_r($_SESSION, true)."</pre>  DB: <pre>".print_r($this->_drupalDB, true)."</pre> from your browser.");
             } else {
-                throw new Exception( __('Form validation failed.', 'drupal2wp') );
+                do_action('drupal2wp_view_step2_submit', $this);
             }
         }
     }

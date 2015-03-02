@@ -1,8 +1,5 @@
 <?php
 
-// Deny direct access
-defined('ABSPATH') or die("No script kiddies please!");
-
 /**
  * Class Drupal2WordPress_Views
  * Handles the views for the plugin
@@ -81,7 +78,7 @@ class Drupal2WordPress_Views {
             // Define and initialize processor
             $this->_processor = new Drupal2WordPress_ViewProcessor($this->_pageHook);
             $this->_processor->init();
-            // Fetch step (processor may alter the step)
+            // Fetch step
             $this->_step = $this->_processor->getStep();
             // Set Drupal Version
             $this->_drupalVersion = $_SESSION['druaplDB']['version'];
@@ -101,11 +98,12 @@ class Drupal2WordPress_Views {
             wp_die( __('You do not have sufficient permissions to access this page.') );
         }
         try {
-            // Combine our messages
-            $this->errors = array_merge($this->errors, $this->_processor->getErrors());
-            $this->notice = array_merge($this->notice, $this->_processor->getNotices());
-            $this->success = array_merge($this->success, $this->_processor->getSuccess());
-            // Define template vars
+
+//            $newSlug = get_permalink(162);
+////            $newSlug = basename( $newSlug );
+//
+//            wp_die('<pre>'.print_r($newSlug,true).'</pre>');
+
             $TEMPLATE_VARS = array(
                 'errors' => $this->errors,
                 'success' => $this->success,
@@ -115,19 +113,15 @@ class Drupal2WordPress_Views {
             // Show view
             switch($this->_step) {
                 case 3:
-                    // Nothing to see here! (Needed to load the page view)
+                    add_action('drupal2wp_import_iframe', array($this, 'displayImportIframe'));
                     break;
                 case 2:
-                    // Fetch Drupal content types (bundle)
-                    $drupalPostTypes = $this->_processor->getImporterInstance()->getPostTypes();
-                    // Fetch Drupal User Roles
-                    $drupalUserRoles = $this->_processor->getImporterInstance()->getRoles();
                     // Fetch Drupal Terms
                     $drupalTerms = $this->_processor->getImporterInstance()->getTerms();
+                    // Fetch Drupal content types (bundle)
+                    $drupalPostTypes = $this->_processor->getImporterInstance()->getPostTypes();
                     // Fetch WordPress registered post types
                     $wpPostTypes = get_post_types();
-                    // Fetch WordPress User Roles
-                    $wpUserRoles = get_editable_roles();
                     // Remove unnecessary post types for the import
                     unset(
                         $wpPostTypes['attachment'],
@@ -150,10 +144,9 @@ class Drupal2WordPress_Views {
                     $TEMPLATE_VARS['drupalPrefix'] = $_SESSION['druaplDB']['prefix'];
                     $TEMPLATE_VARS['drupalTerms'] = $drupalTerms;
                     $TEMPLATE_VARS['drupalPostTypes'] = $drupalPostTypes;
-                    $TEMPLATE_VARS['drupalUserRoles'] = $drupalUserRoles;
                     $TEMPLATE_VARS['wpPostTypes'] = $wpPostTypes;
                     $TEMPLATE_VARS['wpTerms'] = $wpTerms;
-                    $TEMPLATE_VARS['wpUserRoles'] = $wpUserRoles;
+//                    wp_die('<pre>'.print_r($wpTerms, true).'</pre>');
                     break;
                 default:
                     $this->_step = 1;
@@ -170,7 +163,7 @@ class Drupal2WordPress_Views {
 
     /**
      * Loads the page
-     * @param array $TEMPLATE_VARS
+     * @param $TEMPLATE_VARS
      * @throws Exception
      */
     private function _loadPage($TEMPLATE_VARS) {
@@ -183,4 +176,11 @@ class Drupal2WordPress_Views {
         }
     }
 
+    /**
+     * Displays the import iframe
+     */
+    public function displayImportIframe() {
+        // Display whatever it is you want to show
+        echo '<iframe src="'.wp_nonce_url( DRUPAL2WP_DIRECTORY_URL.'_processImport.php', 'drupal2wp_import_iframe' ).'" width="100%" height="1000px" frameBorder="0">Browser does not support iframes.</iframe>';
+    }
 }

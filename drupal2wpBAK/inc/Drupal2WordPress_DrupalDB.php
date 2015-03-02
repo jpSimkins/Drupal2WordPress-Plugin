@@ -18,10 +18,6 @@
 	+=============================================================================================+
 */
 
-
-// Deny direct access
-defined('ABSPATH') or die("No script kiddies please!");
-
 define("DB_QUERY_REGEXP", "/(%d|%s|%%|%f|%b)/");
 
 class Drupal2WordPress_DrupalDB {

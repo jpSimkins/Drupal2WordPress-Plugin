@@ -7,7 +7,7 @@
                 <p><?php echo $error; ?></p>
             <?php endforeach; ?>
         </div>
-    <?php endif; ?>
+    <? endif; ?>
     <?php
     // Show any notifications
     if (!empty($TEMPLATE_VARS['errors'])) : ?>
@@ -16,14 +16,14 @@
             <p><?php echo $error; ?></p>
             <?php endforeach; ?>
         </div>
-    <?php endif;
+    <? endif;
     if (!empty($TEMPLATE_VARS['success'])) : ?>
         <div class="updated">
             <?php foreach($TEMPLATE_VARS['success'] as $error) : ?>
                 <p><?php echo $error; ?></p>
             <?php endforeach; ?>
         </div>
-    <?php endif; ?>
+    <? endif; ?>
     <hr/>
     <?php
     // load step view

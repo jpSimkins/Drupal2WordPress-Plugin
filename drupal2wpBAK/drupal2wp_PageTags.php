@@ -8,8 +8,7 @@
  * License: GPL2
  */
 
-// Deny direct access
-defined('ABSPATH') or die("No script kiddies please!");
+
 
 /**
  * Adds tag support to pages
