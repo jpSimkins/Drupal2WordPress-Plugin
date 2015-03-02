@@ -17,15 +17,15 @@
             </tr>
             <tr>
                 <th scope="row"><label for="drupal-db-database"><?php _e('Database Name', 'drupal2wp'); ?></label></th>
-                <td><input name="druaplDB[database]" type="text" id="drupal-db-name" value="<?php echo isset($_POST['druaplDB']['database']) ? $_POST['druaplDB']['database'] : 'parables_prod'; ?>" class="regular-text"></td>
+                <td><input name="druaplDB[database]" type="text" id="drupal-db-name" value="<?php echo isset($_POST['druaplDB']['database']) ? $_POST['druaplDB']['database'] : ''; ?>" class="regular-text"></td>
             </tr>
             <tr>
                 <th scope="row"><label for="drupal-db-username"><?php _e('Database Username', 'drupal2wp'); ?></label></th>
-                <td><input name="druaplDB[username]" type="text" id="drupal-db-username" value="<?php echo isset($_POST['druaplDB']['username']) ? $_POST['druaplDB']['username'] : 'parables'; ?>" class="regular-text"></td>
+                <td><input name="druaplDB[username]" type="text" id="drupal-db-username" value="<?php echo isset($_POST['druaplDB']['username']) ? $_POST['druaplDB']['username'] : ''; ?>" class="regular-text"></td>
             </tr>
             <tr>
                 <th scope="row"><label for="drupal-db-password"><?php _e('Database Password', 'drupal2wp'); ?></label></th>
-                <td><input name="druaplDB[password]" type="password" id="drupal-db-password" value="<?php echo isset($_POST['password']['username']) ? $_POST['druaplDB']['password'] : 'n#%UEt!uQBs4*k4'; ?>" class="regular-text"></td>
+                <td><input name="druaplDB[password]" type="password" id="drupal-db-password" value="<?php echo isset($_POST['password']['username']) ? $_POST['druaplDB']['password'] : ''; ?>" class="regular-text"></td>
             </tr>
             <tr>
                 <th scope="row"><label for="drupal-db-prefix"><?php _e('Database Prefix', 'drupal2wp'); ?></label></th>
