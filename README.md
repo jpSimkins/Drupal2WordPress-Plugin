@@ -26,6 +26,10 @@ As I worked with this plugin I simplified and improved many parts of the process
             - These changes are outputted for you to add to your .htaccess file to do proper redirects.
     - Comments on Content (up to 11 levels of threaded comments)
         - Only approved comments are imported due to the high level of spam which Drupal sites might endure (in Drupal this means all comments with status 1)
+    - Images are automatically imported into the media manager.
+        - img tags in content are also auto imported to the media manager and updated in the content.
+            - To prevent stealing images from third-party sites, you are to add basic path presets to find and replace.
+    - You can move content by title prefix to different post_types.
 * **Terms**
     - You can associate Drupal vocabulary types to WordPress taxonomies.
     - _Categories_ 
@@ -75,14 +79,14 @@ This is the workflow I used to develop this plugin.
 ## Todo
 - [x] Allow for custom post type association
 - [x] Allow for custom taxonomy association
-- [ ] Import media sources
-- [ ] Add hooks to allow for easy customization for unique setups
+- [x] Import media sources
+- [x] Add hooks to allow for easy customization for unique setups
 - [ ] Add multi-lingual import option (site I'm working on uses two languages so I have duplicate content as each post has two versions)
-- [ ] Add Drupal version selector to allow for 6 and 8 to be added
+- [x] Add Drupal version selector to allow for 6 and 8 to be added
 - [ ] L10n
 
 ## Known Issues
 - [ ] Long titles do not return a valid slug. This is WordPress behavior.
-- [ ] Rewrite is not perfected yet. Issue with mapping Drupal to WordPress.
+- [ ] Rewrite is not perfect. Most installs this seems to work with no issues. Some installs (typically bad setups) have wrong rewrites.
 - [ ] Duplicate tags are appened with `-DUP`. Only an issue if you have duplicate vocabulary
 
