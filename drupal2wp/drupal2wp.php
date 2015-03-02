@@ -2,7 +2,7 @@
 /**
  * Plugin Name: Drupal 2 WordPress
  * Description: Allows for importing a Drupal installation into WordPress
- * Version: 0.0.1
+ * Version: 1.1
  * Author: Jeremy Simkins <jpSimkins@gmail.com>
  * Author URI: http://jeremysimkins.com
  * License: GPL2
