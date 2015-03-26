@@ -55,7 +55,6 @@ class Drupal2WordPress_DrupalImporter {
             ->_truncateWP()
             ->_importTerms()
             ->_importContent()
-            ->fixContentMedia() // Do this after the content
             ->_importUsers()
             ->complete()
         ;

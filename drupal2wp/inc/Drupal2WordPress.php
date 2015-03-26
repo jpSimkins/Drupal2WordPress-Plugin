@@ -36,6 +36,7 @@ class Drupal2WordPress {
             // Add admin menu
             add_action('admin_menu', array($this, 'addMenuItem'));
             // Use a session so we can store the db details (safer than a cookie)
+            // @todo use an encrypted cookie instead
             if (!session_id()) {
                 session_start();
             }

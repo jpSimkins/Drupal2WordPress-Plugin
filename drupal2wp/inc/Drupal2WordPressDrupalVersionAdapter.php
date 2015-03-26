@@ -174,7 +174,7 @@ abstract class Drupal2WordPressDrupalVersionAdapter implements Drupal2WordPressD
 
         do_action('drupal2wp_importer_truncate', $this);
 
-        print '<p><span style="color: green;">'.__('WordPress Tables Truncated', 'drupal2wp').'</span> - '.__('This is required as this ensures content IDs are synced across all systems', 'drupal2wp').'</p>';
+        print '<p><span style="color: green;">'.__('WordPress Tables Truncated', 'drupal2wp').'</span> - '.__('This ensures content/user IDs are synced across all systems', 'drupal2wp').'</p>';
         ob_flush(); flush(); // Output
 
         return $this; // maintain chaining
@@ -186,8 +186,8 @@ abstract class Drupal2WordPressDrupalVersionAdapter implements Drupal2WordPressD
     public function _importTerms() {
         if (!empty($this->options['terms'])) {
             $this->importTerms();
-            do_action('drupal2wp_after_import_terms', $this);
         }
+        do_action('drupal2wp_after_import_terms', $this);
         return $this; // maintain chaining
     }
 
@@ -197,8 +197,10 @@ abstract class Drupal2WordPressDrupalVersionAdapter implements Drupal2WordPressD
     public function _importContent() {
         if (!empty($this->options['content'])) {
             $this->importContent();
-            do_action('drupal2wp_after_import_content', $this);
+            // Add to action
+            add_action('drupal2wp_after_import_content', array($this, 'fixContentMedia'), 50); // Do this after the content 50 forces it to be last
         }
+        do_action('drupal2wp_after_import_content', $this);
         return $this; // maintain chaining
     }
 
@@ -209,8 +211,8 @@ abstract class Drupal2WordPressDrupalVersionAdapter implements Drupal2WordPressD
     public function _importUsers() {
         if (!empty($this->options['users'])) {
             $this->importUsers();
-            do_action('drupal2wp_after_import_users', $this);
         }
+        do_action('drupal2wp_after_import_users', $this);
         return $this; // maintain chaining
     }
 
@@ -509,6 +511,8 @@ abstract class Drupal2WordPressDrupalVersionAdapter implements Drupal2WordPressD
      * Finalizes the import process
      */
     public function complete() {
+        // Combine errors
+        $this->errors = apply_filters('drupal2wp_errors', $this->errors);
         // Output message
         echo '<hr/>';
         echo '<p><span style="color: green; font-size: 2em;">'.__('Import Complete!', 'drupal2wp').'</span></p>';
@@ -524,18 +528,19 @@ abstract class Drupal2WordPressDrupalVersionAdapter implements Drupal2WordPressD
             echo '<h3 style="margin: 8px 0;">'.sprintf( _n( '%d Import Issue', '%d Import Issues', $eCount, 'drupal2wp' ), $eCount ).'</h3>';
             echo '<p class="description">'.__('These issues may be minimal to the import process. Please verify the issues.', 'drupal2wp').'</p>';
             echo '<ul>';
-            foreach($this->errors as $errorID=>$error) {
-                if (is_array($error)) {
+            foreach($this->errors as $errorID=>$errors) {
+                if (is_array($errors)) {
+                    $errorTotal = count($errors);
                     echo '<li>';
-                    echo '<h4 style="margin: 8px 0;">'.ucwords( str_replace('_', ' ', $errorID) ).'</h4>';
+                    echo '<h4 style="margin: 8px 0;">'.ucwords( str_replace('_', ' ', $errorID) ).' - ('.sprintf( _n('%d Error Found', '%d Errors Found', $errorTotal, 'drupal2wp'), $errorTotal).')</h4>';
                     echo '<ul>';
-                    foreach($error as $err) {
+                    foreach($errors as $err) {
                         echo '<li>'.$err.'</li>';
                     }
                     echo '</ul>';
                     echo '</li>';
                 } else {
-                    echo '<li>'.$error.'</li>';
+                    echo '<li>'.$errors.'</li>';
                 }
             }
             echo '</ul>';

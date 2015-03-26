@@ -76,203 +76,6 @@ class Drupal2WordPressDrupalImporter_7 extends Drupal2WordPressDrupalVersionAdap
     }
 
     /**
-     * Imports tags
-     * @return $this
-     */
-    public function importTags() {
-        global $wpdb;
-
-        // Imports all terms from Drupal
-        $drupal_tags = $this->_drupalDB->results("
-            SELECT DISTINCT
-                d.tid,
-                d.name,
-                a.alias
-            FROM ".$this->dbSettings['prefix']."taxonomy_term_data d
-                LEFT JOIN ".$this->dbSettings['prefix']."url_alias a ON (REPLACE(a.source,'taxonomy/term/','') = d.tid)
-            ORDER BY d.tid ASC
-            ");
-        $homeURL = get_home_url();
-        $_tmpTaxonomies = array();
-        $_fixTaxonomies = array();
-        if ($drupal_tags) {
-            foreach($drupal_tags as $dt) {
-                $dt['name'] = trim($dt['name']);
-                $dt['alias'] = trim($dt['alias']);
-                // Attempt to create Drupal alias
-                $dt['alias'] = $this->sanitizeAlias($dt['alias']);
-                // Create WordPress slug
-                $newSlug = $this->convertToWordPressSlug($dt['name']);
-                // Import the new term
-                $result = $wpdb->insert(
-                    $wpdb->terms,
-                    array(
-                        'term_id' => $dt['tid'],
-                        'name' => $dt['name'],
-                        'slug' => $newSlug
-                    ),
-                    array(
-                        '%d',
-                        '%s',
-                        '%s'
-                    )
-                );
-                // See if we have a failure
-                if ($result === false) {
-                    // This is mainly due to matching slugs, attempt with a temp slug to be fixed when done with the rest
-                    $newSlug .= $this->_duplicateSlugSuffix;
-                    $result = $wpdb->insert(
-                        $wpdb->terms,
-                        array(
-                            'term_id' => $dt['tid'],
-                            'name' => $dt['name'],
-                            'slug' => $newSlug
-                        ),
-                        array(
-                            '%d',
-                            '%s',
-                            '%s'
-                        )
-                    );
-                    // See if we have a failure
-                    if ($result === false) {
-                        $this->errors['terms'][] = $wpdb->last_error;
-                    } else {
-                        // Should save this for fixing later
-                        $_fixTaxonomies[] = $dt;
-                        $this->errors['duplicate_taxonomies'][] = sprintf( __('ID: %d. Taxonomy slug is suffixed with %s (%s)', 'drupal2wp'), $dt['tid'], $this->_duplicateSlugSuffix, $newSlug);
-                    }
-                }
-
-                $_tmpTaxonomies[$dt['tid']] = $dt;
-            }
-            // Update WP term_taxonomy table
-            $drupal_taxonomy = $this->_drupalDB->results(
-                "SELECT DISTINCT
-                    d.tid AS term_id,
-                    v.machine_name AS post_tag,
-                    d.description AS description,
-                    h.parent AS parent
-                FROM ".$this->dbSettings['prefix']."taxonomy_term_data d
-                    INNER JOIN ".$this->dbSettings['prefix']."taxonomy_term_hierarchy h ON (d.tid = h.tid)
-                    INNER JOIN ".$this->dbSettings['prefix']."taxonomy_vocabulary v ON (v.vid = d.vid)
-                ORDER BY 'term_id' ASC
-                ");
-            if ($drupal_taxonomy) {
-                foreach($drupal_taxonomy as $dt) {
-                    // Get taxonomy association
-                    $dt['post_tag'] = $this->parseTerms($dt['post_tag']);
-                    // Skip empty post_tags
-                    if (empty($dt['post_tag'])) {
-                        continue;
-                    }
-                    // Import term taxonomy
-                    $result = $wpdb->insert(
-                        $wpdb->term_taxonomy,
-                        array(
-                            'term_id' => $dt['term_id'],
-                            'taxonomy' => $dt['post_tag'],
-                            'description' => $dt['description'],
-                            'parent' => $dt['parent'],
-                        ),
-                        array(
-                            '%d',
-                            '%s',
-                            '%s',
-                            '%d'
-                        )
-                    );
-                    // Check for error
-                    if ($result === false) {
-                        $this->errors['term_taxonomy'][] = $wpdb->last_error;
-                        continue;
-                    }
-                    $_tmpTaxonomies[$dt['term_id']] = array_merge($_tmpTaxonomies[$dt['term_id']], $dt);
-                }
-            }
-
-
-            if (!empty($_fixTaxonomies)) {
-                foreach ($_tmpTaxonomies as $dt) {
-                    $dt['name'] = trim($dt['name']);
-                    $dt['alias'] = trim($dt['alias']);
-                    // Attempt to create Drupal alias
-                    $dt['alias'] = $this->sanitizeAlias($dt['alias']);
-                    // Get term
-                    $tmpTerm = get_term_by('id', (int)$dt['tid'], $dt['post_tag']);
-                    // If there was an error, continue to the next term.
-                    if (!$tmpTerm) {
-                        $this->errors['get_term_by_id'][] = sprintf(__('Could not load the term by ID: %d', 'drupal2wp'), $dt['tid']);
-                        continue;
-                    }
-                    // Get term URI
-                    $tmpTermURI = get_term_link($tmpTerm);
-                    // If there was an error, continue to the next term.
-                    if (is_wp_error($tmpTermURI)) {
-                        $this->errors['get_term_link'][] = sprintf(__('Could not get the term link for ID: %d. Returned error: %s', 'drupal2wp'), $dt['tid'], $tmpTermURI->get_error_message());
-                        continue;
-                    }
-                    $tmpTermURI = str_replace($homeURL, '', $tmpTermURI);
-                    // Add to rewrite rules if different
-                    if ($tmpTermURI !== false && $dt['alias'] && trim($tmpTermURI, '/') != trim($dt['alias'], '/')) {
-                        $this->_htaccessRewriteRules[$dt['alias']] = $tmpTermURI;
-                    }
-                }
-            }
-            print '<p><span style="color: green;">'.__('Tags Imported', 'drupal2wp').'</span> - '.__('Also optimized slugs per WordPress specifications', 'drupal2wp').'</p>';
-        } else {
-            print '<p><span style="color: maroon;">'.__('Tags Failed to Import', 'drupal2wp').'</span></p>';
-        }
-        ob_flush(); flush(); // Output
-        $drupal_tags = $drupal_taxonomy = NULL;
-        unset($drupal_tags, $drupal_taxonomy);
-    }
-
-    /**
-     * Creates a single category to assign content to
-     * @return $this
-     */
-    public function importCategories() {
-        global $wpdb;
-
-        $wpdb->insert(
-            $wpdb->terms,
-            array(
-                'name' => !empty($this->options['default_category_name']) ? $this->options['default_category_name'] : 'Blog',
-                'slug' => !empty($this->options['default_category_slug']) ? $this->options['default_category_slug'] : 'blog'
-            ),
-            array(
-                '%s',
-                '%s'
-            )
-        );
-
-        // Then query to get this entry so we can attach it to content we create
-        $this->blog_term_id = $wpdb->insert_id;
-        if ($this->blog_term_id) {
-            $wpdb->insert(
-                $wpdb->term_taxonomy,
-                array(
-                    'term_id' => $this->blog_term_id,
-                    'taxonomy' => 'category'
-                ),
-                array(
-                    '%d',
-                    '%s'
-                )
-            );
-            if ($wpdb->insert_id) {
-                print '<p><span style="color: green;">'.__('Categories Imported', 'drupal2wp').'</span></p>';
-            } else {
-                print '<p><span style="color: maroon;">'.__('Categories Failed to Import', 'drupal2wp').' - '.__('Attachment failed', 'drupal2wp').'</span></p>';
-            }
-        } else {
-            print '<p><span style="color: maroon;">'.__('Categories Failed to Import', 'drupal2wp').' - '.__('All failed', 'drupal2wp').'</span></p>';
-        }
-        ob_flush(); flush(); // Output
-    }
-
-    /**
      * Runs check and processes terms import
      */
     public function importTerms() {
@@ -828,8 +631,10 @@ class Drupal2WordPressDrupalImporter_7 extends Drupal2WordPressDrupalVersionAdap
                 c.mail AS comment_author_email,
                 c.homepage AS comment_author_url,
                 c.hostname AS comment_author_IP,
-                FROM_UNIXTIME(c.created) AS comment_date
+                FROM_UNIXTIME(c.created) AS comment_date,
+                f.comment_body_value AS comment_content
             FROM ".$this->dbSettings['prefix']."comment c
+                LEFT JOIN ".$this->dbSettings['prefix']."field_data_comment_body f ON (c.cid = f.entity_id)
             WHERE c.pid = {$commentID}
                 AND c.status = 1
             ");
@@ -963,7 +768,23 @@ class Drupal2WordPressDrupalImporter_7 extends Drupal2WordPressDrupalVersionAdap
      */
     public function importUsers() {
         if (!empty($this->options['users'])) {
-            $this->_importUsersData();
+            // Get total of users
+            $totalUsers = $this->_drupalDB->row("
+                SELECT COUNT(1) as total
+                FROM ".$this->dbSettings['prefix']."users u
+                WHERE u.uid > 1
+                ".(!empty($this->options['enabled_users_only']) ? 'AND u.status = 1' : '')."
+                ORDER BY u.uid
+            ");
+            if (!empty($totalUsers) && !empty($totalUsers['total'])) {
+                $importLimit = 5000; // Temp fix for large set of users @todo make this an option
+                for($i=0; $i<=$totalUsers['total']; $i+=$importLimit) {
+                    // Modify to get the
+                    $this->_importUsersData($i, $importLimit);
+                }
+                print '<p><span style="color: green;">'.sprintf(__('Users Import Complete (%d imported)', 'drupal2wp'), $totalUsers['total']).'</span></p>';
+                ob_flush(); flush(); // Output
+            }
         }
         return $this; // maintain chaining
     }
@@ -973,7 +794,7 @@ class Drupal2WordPressDrupalImporter_7 extends Drupal2WordPressDrupalVersionAdap
      * Admin is skipped and uses the WP admin instead
      * Passwords are left blank, so users will need to reset their passwords
      */
-    private function _importUsersData() {
+    private function _importUsersData($offset, $importLimit) {
         global $wpdb;
         $dUsers = $this->_drupalDB->results("
             SELECT
@@ -986,10 +807,11 @@ class Drupal2WordPressDrupalImporter_7 extends Drupal2WordPressDrupalVersionAdap
                 u.status,
                 (SELECT GROUP_CONCAT(rid) FROM ".$this->dbSettings['prefix']."users_roles ur WHERE ur.uid = u.uid) as rid
             FROM ".$this->dbSettings['prefix']."users u
-            WHERE u.uid != 1
-                AND u.uid != 0
-            ".(!empty($this->options['enabled_users_only']) ? 'AND u.status = 1' : '')
-        );
+            WHERE u.uid > 1
+            ".(!empty($this->options['enabled_users_only']) ? 'AND u.status = 1' : '')."
+            ORDER BY u.uid
+            LIMIT {$offset},{$importLimit}
+        ");
         if (!empty($dUsers)) {
             // Make sure we have the function needed here
             if ( !function_exists('get_editable_roles') ) {
@@ -1060,7 +882,7 @@ class Drupal2WordPressDrupalImporter_7 extends Drupal2WordPressDrupalVersionAdap
                     } else if (isset($this->_wpUserRoles[$wpUserRole]['level_1']) && $this->_wpUserRoles[$wpUserRole]['level_1'] == '1') {
                         $userLevel = 1;
                         $showAdminBarOnFront = 'false';
-                    } else if (isset($this->_wpUserRoles[$wpUserRole]['level_0']) && $this->_wpUserRoles[$wpUserRole]['level_0'] == '1') {
+                    } else {
                         $userLevel = 0;
                         $showAdminBarOnFront = 'false';
                     }
@@ -1103,9 +925,9 @@ class Drupal2WordPressDrupalImporter_7 extends Drupal2WordPressDrupalVersionAdap
                     ));
                 }
             }
-            print '<p><span style="color: green;">'.__('Users Imported', 'drupal2wp').'</span></p>';
+//            print '<p><span style="color: green;">'.sprintf(__('Users Imported: %d - %d', 'drupal2wp'), $offset, $offset+$importLimit).'</span></p>';
         } else {
-            print '<p><span style="color: maroon;">'.__('Users failed to Import', 'drupal2wp').'</span></p>';
+            print '<p><span style="color: maroon;">'.sprintf(__('Failed to import users: %d - %d', 'drupal2wp'), $offset, $offset+$importLimit).'</span></p>';
         }
         ob_flush(); flush(); // Output
     }
