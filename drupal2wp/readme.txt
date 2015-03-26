@@ -57,6 +57,7 @@ More will be added to improve custom installations
 *Importer Hooks*
 * Initialization
 ** drupal2wp_init - On initiation of the plugin (1 arg - $importObj)
+** drupal2wp_3rd_party_options - Allows for third party options to be selected in step1 (1 arg - $thirdPartyOptions) append to array and return array
 * Settings
 ** drupal2wp_fix_settings - Runs after the initial fix settings is complete (1 arg - $importObj)
 * Truncate
