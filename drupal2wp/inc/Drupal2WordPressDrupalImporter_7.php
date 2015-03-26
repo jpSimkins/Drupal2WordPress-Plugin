@@ -662,7 +662,7 @@ class Drupal2WordPressDrupalImporter_7 extends Drupal2WordPressDrupalVersionAdap
                     array(
                         '%d',
                         '%d',
-                        '%d',
+                        '%s',
                         '%s',
                         '%s',
                         '%s',
