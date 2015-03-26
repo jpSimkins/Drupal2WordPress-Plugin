@@ -556,6 +556,8 @@ abstract class Drupal2WordPressDrupalVersionAdapter implements Drupal2WordPressD
      * Shows the .htaccess edits for rewrite rules
      */
     public function outputHtaccessRedirects() {
+        // Combine htaccess rewrites
+        $this->_htaccessRewriteRules = apply_filters('drupal2wp_htaccess_rewrite_rules', $this->_htaccessRewriteRules);
         if (!empty($this->_htaccessRewriteRules)) {
             echo '<hr/>';
             echo '<h3>'.sprintf( __('Add this to your .htaccess file to have proper 301 redirects (%d total)', 'drupal2wp'), count($this->_htaccessRewriteRules)).'</h3>';

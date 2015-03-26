@@ -33,6 +33,12 @@ directory take precedence. For example, `/assets/screenshot-1.png` would win ove
 = 1.0 =
 * Initial Plugin
 
+= 1.4 =
+* Fixed missing comment join for comment data
+* Improved user import for large set of users
+* Removed old code
+* Optimized hook placements
+* Added `drupal2wp_errors` and `drupal2wp_htaccess_rewrite_rules` filters to append to these with plugins
 
 == Hooks List ==
 
@@ -45,6 +51,8 @@ More will be added to improve custom installations
 * drupal2wp_drupal_terms - modify Drupal terms
 * drupal2wp_modify_post_type - modify post_type (1 arg - $post)
 * drupal2wp_modify_post - modify post array (1 arg - $post)
+* drupal2wp_errors - Add errors to the complete page (1 arg - $errors) append to array and return array
+* drupal2wp_htaccess_rewrite_rules - Add rewrite rules to the complete page (1 arg - $rewrites) append to array and return array
 
 *Importer Hooks*
 * Initialization
