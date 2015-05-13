@@ -320,8 +320,8 @@ class Drupal2WordPressDrupalImporter_7 extends Drupal2WordPressDrupalVersionAdap
         }
 
         // Get all post from Drupal and add it into WordPress
-        $drupalContent = $this->_drupalDB->results("
-          SELECT
+        $sqlQuery = apply_filters( 'drupal2wp_query_nodes',
+        	"SELECT
               DISTINCT n.nid AS id,
               n.uid AS post_author,
               FROM_UNIXTIME(n.created) AS post_date,
@@ -334,8 +334,8 @@ class Drupal2WordPressDrupalImporter_7 extends Drupal2WordPressDrupalVersionAdap
           FROM ".$this->dbSettings['prefix']."node n
             LEFT JOIN ".$this->dbSettings['prefix']."field_data_body r ON (r.entity_id = n.nid)
             LEFT JOIN ".$this->dbSettings['prefix']."url_alias a ON (REPLACE(a.source,'node/','') = n.nid)
-            ORDER BY n.nid
-        ");
+            ORDER BY n.nid" );
+        $drupalContent = $this->_drupalDB->results($sqlQuery);
         if (!empty($drupalContent)) {
             // Save each post
             foreach($drupalContent as $dp) {
