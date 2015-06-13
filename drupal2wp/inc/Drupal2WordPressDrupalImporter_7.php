@@ -741,7 +741,7 @@ class Drupal2WordPressDrupalImporter_7 extends Drupal2WordPressDrupalVersionAdap
                 u.fid,
                 m.uri,
                 m.filename,
-                m.origname
+                m.uri
             FROM ".$this->dbSettings['prefix']."file_usage u
                 LEFT JOIN ".$this->dbSettings['prefix']."file_managed m ON (m.fid = u.fid)
             WHERE u.type = 'node'
