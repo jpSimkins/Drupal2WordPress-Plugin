@@ -349,7 +349,7 @@ abstract class Drupal2WordPressDrupalVersionAdapter implements Drupal2WordPressD
                                     $originalSrc = $data[2][$_key];
                                     // Make sure we want to replace this
                                     foreach ($this->options['content_media_import'] as $url) {
-                                        if (0 === strpos($originalSrc, $url)) {
+                                        if ( !empty($url) && 0 === strpos($originalSrc, $url)) {
                                             // Check if original src is relative (use tmp so we don't alter the original src for replace later)
                                             $tmp = $originalSrc;
                                             if (!empty($this->options['drupal_url'])) {
