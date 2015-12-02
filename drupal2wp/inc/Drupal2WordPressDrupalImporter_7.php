@@ -823,16 +823,16 @@ class Drupal2WordPressDrupalImporter_7 extends Drupal2WordPressDrupalVersionAdap
             foreach($dUsers as $dUser) {
                 // Check the user role
                 $wpUserRole = $this->processUserRole($dUser['rid']);
-                // Only process if we have a user role
+                // Because Drupal7 doesn't set user roles for subscribers, if no user role set to subscriber
                 if (!$wpUserRole) {
-                    continue;
+                    $wpUserRole = "subscriber";
                 }
                 // Add user, make email login. Empty password to force lost password
                 $wpdb->insert(
                     $wpdb->users,
                     array(
                         'ID' => $dUser['uid'],
-                        'user_login' => $dUser['mail'],
+                        'user_login' => $dUser['name'],
                         'user_pass' => '',
                         'user_nicename' => $dUser['name'],
                         'user_email' => $dUser['mail'],
