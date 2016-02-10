@@ -284,7 +284,7 @@
                     <p class="description"><?php _e('This is the path to replace for assets that fail to import into the media manager.', 'drupal2wp'); ?></p>
                     <label for="files-location" style="margin-top:20px; display: block;">
                         <?php _e('Drupal Files Directory URL:', 'drupal2wp'); ?>
-                        <input name="options[files_location]" type="text" id="files-location" class="large" style="width: 300px;" value="<?php echo !empty($_POST['options']['files_location']) ? $_POST['options']['files_location'] : 'http://parables.tv/sites/default/files/'; ?>">
+                        <input name="options[files_location]" type="text" id="files-location" class="large" style="width: 300px;" value="<?php echo !empty($_POST['options']['files_location']) ? $_POST['options']['files_location'] : ''; ?>">
                         <?php
                         echo ' ';
                         printf( __('(ie: %s)', 'drupal2wp'), 'http://domain.com/sites/default/files/');

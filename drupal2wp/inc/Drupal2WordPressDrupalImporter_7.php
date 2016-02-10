@@ -740,8 +740,7 @@ class Drupal2WordPressDrupalImporter_7 extends Drupal2WordPressDrupalVersionAdap
             SELECT
                 u.fid,
                 m.uri,
-                m.filename,
-                m.origname
+                m.filename
             FROM ".$this->dbSettings['prefix']."file_usage u
                 LEFT JOIN ".$this->dbSettings['prefix']."file_managed m ON (m.fid = u.fid)
             WHERE u.type = 'node'
@@ -752,7 +751,7 @@ class Drupal2WordPressDrupalImporter_7 extends Drupal2WordPressDrupalVersionAdap
             foreach ($postMedia as $pMedia) {
                 // Replace Drupal public:// with URL
                 $file = str_replace('public://', $this->options['files_location'], $pMedia['uri']);
-                $attachmentID = self::addFileToMediaManager($postID, $file, '', $pMedia['origname'], $this->errors['import_media']);
+                $attachmentID = self::addFileToMediaManager($postID, $file, '', $pMedia['filename'], $this->errors['import_media']);
                 if (!is_wp_error($attachmentID)) {
                     set_post_thumbnail($postID, $attachmentID);
                 } else {

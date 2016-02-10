@@ -119,8 +119,31 @@ abstract class Drupal2WordPressDrupalVersionAdapter implements Drupal2WordPressD
 
         // Connect to the DB
         $this->_drupalDB = new Drupal2WordPress_DrupalDB($this->dbSettings);
+
+        // Ensure to white-list the drupal site
+        add_filter( 'http_request_host_is_external', array($this, 'allowDrupalHostAccess'), 10, 3 );
+
         // Do init action
         do_action('drupal2wp_importer_init', $this);
+    }
+
+
+    /**
+     * Allows Drupal site host access due to WordPress security
+     * This prevents the error: A valid URL was not provided.
+     * @param $allow
+     * @param $host
+     * @param $url
+     * @return bool
+     */
+    public function allowDrupalHostAccess( $allow, $host, $url ) {
+        if ( !empty($this->options['drupal_url']) ) {
+            $_urlParts = parse_url($this->options['drupal_url']);
+            if (!empty($_urlParts['host']) && $host == $_urlParts['host']) {
+                $allow = true;
+            }
+        }
+        return $allow;
     }
 
     /**

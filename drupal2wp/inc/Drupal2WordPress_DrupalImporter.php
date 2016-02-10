@@ -90,6 +90,7 @@ class Drupal2WordPress_DrupalImporter {
                     throw new Exception( __('Invalid Drupal version for importing', 'drupal2wp'));
                     break;
             }
+            session_write_close(); // close session to show output, else it shows it all once complete due to PHP session logic
         } else {
             throw new Exception( __('Drupal version details are missing', 'drupal2wp'));
         }
@@ -109,7 +110,6 @@ class Drupal2WordPress_DrupalImporter {
      */
     public function getPostTypes() {
         return apply_filters('drupal2wp_drupal_post_types', self::getImporter()->getPostTypes(), $this->_drupalImporter);
-//        return self::getImporter()->getPostTypes();
     }
 
     /**
@@ -118,7 +118,6 @@ class Drupal2WordPress_DrupalImporter {
      */
     public function getRoles() {
         return apply_filters('drupal2wp_drupal_roles', self::getImporter()->getRoles(), $this->_drupalImporter);
-//        return self::getImporter()->getRoles();
     }
 
     /**
@@ -127,7 +126,6 @@ class Drupal2WordPress_DrupalImporter {
      */
     public function getTerms() {
         return apply_filters('drupal2wp_drupal_terms', self::getImporter()->getTerms(), $this->_drupalImporter);
-//        return self::getImporter()->getTerms();
     }
 
 }
