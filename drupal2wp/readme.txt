@@ -49,6 +49,7 @@ directory take precedence. For example, `/assets/screenshot-1.png` would win ove
 * Fixed output not showing until complete due to PHP Session.
 * Optimized code to prevent any PHP notices for undefined vars.
 * Fixed empty database password from being denied access
+* Fixed security issue with some localhosts that prevent local domains from access to import media
 * Merged pull requests: 7, 13, 14
 
 == Hooks List ==
