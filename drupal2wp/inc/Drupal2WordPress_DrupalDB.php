@@ -26,7 +26,7 @@ define("DB_QUERY_REGEXP", "/(%d|%s|%%|%f|%b)/");
 
 class Drupal2WordPress_DrupalDB {
     public function __construct($connection){
-        if (!empty($connection['host']) && !empty($connection['username']) && !empty($connection['password']) && !empty($connection['database'])){
+        if (!empty($connection['host']) && !empty($connection['username']) && isset($connection['password']) && !empty($connection['database'])){
             $this->host = $connection['host'];
             $this->user = $connection['username'];
             $this->pass = $connection['password'];
@@ -42,7 +42,7 @@ class Drupal2WordPress_DrupalDB {
         }
         else if (!empty($connection) && is_array($connection)){
             foreach ($connection as $c){
-                if (!empty($c['host']) && !empty($c['username']) && !empty($c['password']) && !empty($c['database'])  && !empty($c['alias'])){
+                if (!empty($c['host']) && !empty($c['username']) && isset($c['password']) && !empty($c['database'])  && !empty($c['alias'])){
                     if (empty($c['port'])){
                         $c['port'] = null;
                     }
@@ -68,7 +68,7 @@ class Drupal2WordPress_DrupalDB {
     public function check($connection=null){
         $port = $socket = null;
         if (!empty($connection)){
-            if (!empty($this->connections['r'][$connection]['host']) && !empty($this->connections['r'][$connection]['username']) && !empty($this->connections['r'][$connection]['password']) && !empty($this->connections['r'][$connection]['database'])){
+            if (!empty($this->connections['r'][$connection]['host']) && !empty($this->connections['r'][$connection]['username']) && isset($this->connections['r'][$connection]['password']) && !empty($this->connections['r'][$connection]['database'])){
                 if (!empty($this->connections['r'][$connection]['port'])){
                     $port = $this->connections['r'][$connection]['port'];
                 }
@@ -81,7 +81,7 @@ class Drupal2WordPress_DrupalDB {
                     return false;
                 }
             }
-            else if (!empty($this->connections['w'][$connection]['host']) && !empty($this->connections['w'][$connection]['username']) && !empty($this->connections['w'][$connection]['password']) && !empty($this->connections['w'][$connection]['database'])){
+            else if (!empty($this->connections['w'][$connection]['host']) && !empty($this->connections['w'][$connection]['username']) && isset($this->connections['w'][$connection]['password']) && !empty($this->connections['w'][$connection]['database'])){
                 if (!empty($this->connections['w'][$connection]['port'])){
                     $port = $this->connections['w'][$connection]['port'];
                 }
@@ -94,7 +94,7 @@ class Drupal2WordPress_DrupalDB {
                     return false;
                 }
             }
-            else if (!empty($this->connections['rw'][$connection]['host']) && !empty($this->connections['rw'][$connection]['username']) && !empty($this->connections['rw'][$connection]['password']) && !empty($this->connections['rw'][$connection]['database'])){
+            else if (!empty($this->connections['rw'][$connection]['host']) && !empty($this->connections['rw'][$connection]['username']) && isset($this->connections['rw'][$connection]['password']) && !empty($this->connections['rw'][$connection]['database'])){
                 if (!empty($this->connections['rw'][$connection]['port'])){
                     $port = $this->connections['rw'][$connection]['port'];
                 }
@@ -109,7 +109,7 @@ class Drupal2WordPress_DrupalDB {
             }
         }
         else{
-            if (!empty($this->host) && !empty($this->name) && !empty($this->user) && !empty($this->pass)){
+            if (!empty($this->host) && !empty($this->name) && !empty($this->user)){
                 $dbc = @mysqli_connect($this->host,$this->user,$this->pass,$this->name,$port,$socket);
                 if (mysqli_connect_errno()){
                     return false;
@@ -119,7 +119,7 @@ class Drupal2WordPress_DrupalDB {
                 $output = array();
                 foreach ($this->connections as $conns){
                     foreach ($conns as $k=>$v){
-                        if (!empty($v['host']) && !empty($v['username']) && !empty($v['password']) && !empty($v['database'])){
+                        if (!empty($v['host']) && !empty($v['username']) && isset($v['password']) && !empty($v['database'])){
                             $port = $socket = null;
                             if (!empty($v['port'])){
                                 $port = $v['port'];
@@ -188,7 +188,7 @@ class Drupal2WordPress_DrupalDB {
             $show_error = TRUE;
         }
 
-        if (!empty($this->host) && !empty($this->name) && !empty($this->user) && !empty($this->pass)){
+        if (!empty($this->host) && !empty($this->name) && !empty($this->user)){
             $connection = array(
                 "host" => $this->host,
                 "username" => $this->user,

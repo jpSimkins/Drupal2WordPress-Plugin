@@ -106,8 +106,8 @@ abstract class Drupal2WordPressDrupalVersionAdapter implements Drupal2WordPressD
             throw new Exception( __('Drupal database details are missing', 'drupal2wp'));
         }
         // Fetch data from Session
-        $this->dbSettings = $_SESSION['druaplDB'];
-        $this->options = $_SESSION['options'];
+        $this->dbSettings = !empty($_SESSION['druaplDB']) ? $_SESSION['druaplDB'] : array();
+        $this->options = !empty($_SESSION['options']) ? $_SESSION['options'] : array();
         $this->_drupalVersion = $this->dbSettings['version'];
         $this->default_comment_status = get_option('default_comment_status', $this->default_comment_status);
         $this->default_ping_status = get_option('default_ping_status', $this->default_ping_status);
