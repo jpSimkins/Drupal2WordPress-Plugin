@@ -40,6 +40,17 @@ directory take precedence. For example, `/assets/screenshot-1.png` would win ove
 * Optimized hook placements
 * Added `drupal2wp_errors` and `drupal2wp_htaccess_rewrite_rules` filters to append to these with plugins
 
+= 1.4.1 =
+* Added htaccess rewrite hook and incremented version
+
+= 1.4.2 =
+* Fixed database issue with media import using incorrect column name.
+* Removed hardcoded domain name in step 2 form for media.
+* Fixed output not showing until complete due to PHP Session.
+* Optimized code to prevent any PHP notices for undefined vars.
+* Fixed empty database password from being denied access
+* Merged pull requests: 7, 13, 14
+
 == Hooks List ==
 
 More will be added to improve custom installations
