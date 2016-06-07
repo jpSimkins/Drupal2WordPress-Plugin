@@ -396,7 +396,7 @@ class Drupal2WordPressDrupalImporter_7 extends Drupal2WordPressDrupalVersionAdap
             'id' => '', // empty by default to insert a new ID
             'post_author' => 1,
             'post_date' => $tmpDate,
-            'post_date_gmt' => get_gmt_from_date( $tmpDate ),
+            'post_date_gmt' => get_gmt_from_date( isset($dp['post_date'])?$dp['post_date']:$tmpDate ),
             'post_content' => '',
             'post_title' => '',
             'post_excerpt' => '',
