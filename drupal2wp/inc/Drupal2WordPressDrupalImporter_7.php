@@ -332,8 +332,8 @@ class Drupal2WordPressDrupalImporter_7 extends Drupal2WordPressDrupalVersionAdap
               IF(n.status = 1, 'publish', 'draft') AS post_status,
               a.alias
           FROM ".$this->dbSettings['prefix']."node n
-            LEFT JOIN ".$this->dbSettings['prefix']."field_data_body r ON (r.entity_id = n.nid)
-            LEFT JOIN ".$this->dbSettings['prefix']."url_alias a ON (REPLACE(a.source,'node/','') = n.nid)
+            LEFT JOIN ".$this->dbSettings['prefix']."field_data_body r ON (r.entity_id = n.nid) AND (r.language = n.language)
+            LEFT JOIN ".$this->dbSettings['prefix']."url_alias a ON (REPLACE(a.source,'node/','') = n.nid) AND (a.language = n.language)
             ORDER BY n.nid" );
         $drupalContent = $this->_drupalDB->results($sqlQuery);
         if (!empty($drupalContent)) {
